@@ -29,8 +29,8 @@ class WifiBandsManager:
         """Execute get wifi band status command in the livebox using AMX USP """
         # Check if band number exists
         #TODO: Validate if band doensnt exists
-        logger.info("Getting wifi status - WiFi.Radio.1.Status")
-        status = self.amx_usp_interface.read_object(path="WiFi.Radio.1.Status")
+        logger.info("Getting wifi status - Device.WiFi.Radio.1.Status")
+        status = self.amx_usp_interface.read_object(path="Device.WiFi.Radio.1.Status")
         logger.info(f"status: {status}")
         return status
         
