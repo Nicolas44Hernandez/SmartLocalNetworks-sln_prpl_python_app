@@ -41,8 +41,8 @@ do_install () {
         # MANAGERS
         install -d ${D}/usr/srv/server/managers
         install -m 0644 ${S}/server/managers/__init__.py ${D}/usr/srv/server/managers/
-        install -d ${D}/usr/srv/server/managers/wifi_bands_manager
-        install -m 0644 ${S}/server/managers/wifi_bands_manager/* ${D}/usr/srv/server/managers/wifi_bands_manager/
+        install -d ${D}/usr/srv/server/managers/wifi_5GHz_band_manager
+        install -m 0644 ${S}/server/managers/wifi_5GHz_band_manager/* ${D}/usr/srv/server/managers/wifi_5GHz_band_manager/
 
         # REST API
         install -d ${D}/usr/srv/server/rest_api
