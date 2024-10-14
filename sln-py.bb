@@ -69,10 +69,10 @@ do_install () {
         install -m 0644 ${S}/test_models/compare_results.py ${D}/usr/test_models/
         install -m 0644 ${S}/test_models/test_model_MLP.py ${D}/usr/test_models/
         install -d ${D}/usr/test_models/expected_results
-        install -m 0644 ${S}/test_models/expected_results/test_pred_test_dataset.csv ${D}/usr/test_models/
-        install -m 0644 ${S}/test_models/expected_results/test_pred_train_dataset.csv ${D}/usr/test_models/
-        install -m 0644 ${S}/test_models/expected_results/y_pred_test_dataset.csv ${D}/usr/test_models/
-        install -m 0644 ${S}/test_models/expected_results/y_pred_train_dataset.csv ${D}/usr/test_models/
+        install -m 0644 ${S}/test_models/expected_results/test_pred_test_dataset.csv ${D}/usr/test_models/expected_results/
+        install -m 0644 ${S}/test_models/expected_results/test_pred_train_dataset.csv ${D}/usr/test_models/expected_results/
+        install -m 0644 ${S}/test_models/expected_results/y_pred_test_dataset.csv ${D}/usr/test_models/expected_results/
+        install -m 0644 ${S}/test_models/expected_results/y_pred_train_dataset.csv ${D}/usr/test_models/expected_results/
 }
 
 FILES:${PN} += "/usr/server/*"
