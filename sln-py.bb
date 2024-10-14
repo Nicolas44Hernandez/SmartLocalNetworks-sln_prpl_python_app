@@ -2,6 +2,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 SRC_URI += "file://server"
 SRC_URI += "file://tests"
 SRC_URI += "file://test_models"
+SRC_URI += "file://models"
 
 S = "${WORKDIR}"
 
@@ -55,6 +56,14 @@ do_install () {
         install -m 0644 ${S}/tests/test_usp.py ${D}/usr/tests/
         install -m 0644 ${S}/tests/test_usp_basic.py ${D}/usr/tests/
 
+        # MODELS
+        install -d ${D}/usr/models
+        install -m 0644 ${S}/models/MLP_C_OPTIM.pkl ${D}/usr/models/
+        install -m 0644 ${S}/models/X_test_MLP_C.csv ${D}/usr/models/
+        install -m 0644 ${S}/models/X_train_MLP_C.csv ${D}/usr/models/
+        install -m 0644 ${S}/models/y_test_MLP_C.csv ${D}/usr/models/
+        install -m 0644 ${S}/models/y_train_MLP_C.csv ${D}/usr/models/
+        
         # TEST MODELS
         install -d ${D}/usr/test_models
         install -m 0644 ${S}/test_models/compare_results.py ${D}/usr/test_models/
@@ -69,3 +78,4 @@ do_install () {
 FILES:${PN} += "/usr/server/*"
 FILES:${PN} += "/usr/tests/*"
 FILES:${PN} += "/usr/test_models/*"
+FILES:${PN} += "/usr/models/*"
