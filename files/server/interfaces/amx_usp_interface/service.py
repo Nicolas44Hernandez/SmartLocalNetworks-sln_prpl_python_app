@@ -1,7 +1,13 @@
 """AMX USP interface package"""
+
 import logging
-import pamx
-import json
+from server.common import ServerBoxException, ErrorCode
+
+try:
+    import pamx
+except ModuleNotFoundError:
+    pamx = None  # pylint: disable=C0103
+
 
 logger = logging.getLogger(__name__)
 
@@ -11,27 +17,47 @@ class AmxUspClient:
 
     def __init__(self):
         logger.info("initializing the AmxUspClient")
-        pamx.backend.load("/usr/bin/mods/usp/mod-amxb-usp.so")
-        pamx.backend.set_config({})
-        self.connection = pamx.bus.connect("usp:/var/run/usp/endpoint_agent_path")
+        if pamx is not None:
+            try:
+                pamx.backend.load("/usr/bin/mods/amxb/mod-amxb-usp.so")
+                pamx.backend.set_config({"usp" : {"EndpointID": "proto::python-usp"}})
+                self.connection = pamx.bus.connect("usp:/var/run/imtp/broker_agent_path")
+            except Exception as exc:
+                raise ServerBoxException(ErrorCode.USP_LOAD_ERROR) from exc
 
     # Python AMX functions : get/set/add/delete
     def read_object(self, path: str):
         """Read USP Object"""
         logger.info(f"AMX USP Read object: {path}")
-        return self.connection.get(path)
+        if pamx is not None:
+            try:
+                return self.connection.get(path)
+            except Exception as exc:
+                raise ServerBoxException(ErrorCode.USP_ERROR) from exc
 
     def set_object(self, path: str, params: dict):
         """Set USP Object"""
         logger.info(f"AMX USP Set object: {path}  params: {params}")
-        return self.connection.set(path, json.loads(params))
+        if pamx is not None:
+            try:
+                return self.connection.set(path, params)
+            except Exception as exc:
+                raise ServerBoxException(ErrorCode.USP_ERROR) from exc
 
     def add_object(self, path, params: dict):
         """Add USP Object"""
         logger.info(f"AMX USP Add object: {path}  params: {params}")
-        return self.connection.add(path, json.loads(params))
+        if pamx is not None:
+            try:
+                return self.connection.add(path, params)
+            except Exception as exc:
+                raise ServerBoxException(ErrorCode.USP_ERROR) from exc
 
     def del_object(self, path: str):
         """Delete USP Object"""
         logger.info(f"AMX USP Delete object: {path}")
-        return self.connection.delete(path)
+        if pamx is not None:
+            try:
+                return self.connection.delete(path)
+            except Exception as exc:
+                raise ServerBoxException(ErrorCode.USP_ERROR) from exc

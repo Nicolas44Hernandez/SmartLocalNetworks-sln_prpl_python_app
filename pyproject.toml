@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "sln-prpl-app"
+version = "0.1.0"
+description = ""
+authors = ["Nicolas44Hernandez <n44hernandezp@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.9.9"
+flask = "2.0.1"
+werkzeug = "2.0.1"
+pandas ="2.2.2"
+joblib = "1.4.0"
+scikit-learn = "1.4.2"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+pylint = "^3.3.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
