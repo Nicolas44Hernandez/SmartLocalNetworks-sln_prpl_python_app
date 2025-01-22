@@ -1,0 +1,65 @@
+{
+    "version": 1,
+    "disable_existing_loggers": true,
+    "formatters": {
+        "default": {
+            "format": "%(asctime)s [%(threadName)s] [%(levelname)s] %(name)s: %(message)s"
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "default"
+        },
+        "wifi": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "default",
+            "filename": "logs/wifi.log",
+            "maxBytes": 10240,
+            "backupCount": 0
+        },
+        "api_rest": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "default",
+            "filename": "logs/api-rest.log",
+            "maxBytes": 10240,
+            "backupCount": 0
+        }
+    },
+    "root": {
+        "level": "WARN",
+        "handlers": [
+            "console"
+        ]
+    },
+    "loggers": {
+        "server.app": {
+            "level": "INFO",
+            "handlers": [
+                "console"
+            ],
+            "propagate": false
+        },
+        "server.rest_api": {
+            "level": "INFO",
+            "handlers": [
+                "api_rest"
+            ],
+            "propagate": false
+        },
+        "server.managers.wifi_bands_manager": {
+            "level": "INFO",
+            "handlers": [
+                "wifi"
+            ],
+            "propagate": false
+        },
+        "server.interfaces.amx_usp_interface": {
+            "level": "INFO",
+            "handlers": [
+                "wifi"
+            ],
+            "propagate": false
+        }
+    }
+}

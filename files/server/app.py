@@ -2,42 +2,53 @@
 
 import logging
 from logging.config import dictConfig
-from os import path
-import yaml
+import os
+import json
 from flask import Flask
-from flask_restful import Api
 
 # Managers
 from server.managers.wifi_5GHz_band_manager import wifi_5GHz_band_manager_service
 
 # Rest APIs
-api = Api()
-from server.rest_api.wifi_controler import WifiStatusApi
+from server.rest_api.wifi_controller import bp as wifi_controller_bp
+
+# Common
+from server.common import ServerBoxException, handle_server_box_exception
 
 logger = logging.getLogger(__name__)
 
 
 def create_app(
-    config_dir: str = path.join(path.dirname(path.abspath(__file__)), "config"),
+    config_dir: str = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config"),
 ):
     """Create the Flask app"""
 
     # Create app Flask
-    app = Flask("Orange Orchestrator")
+    app = Flask("Orange SLN 5GHz on/off Application")
 
-    # Get configuration files    
-    app_config = path.join(config_dir, "general-config.yml")
-    logging_config = path.join(config_dir, "logging-config.yml")
+    # Get server configuration files
+    if os.getenv("FLASK_ENV") == "DEVELOPMENT":
+        app_config = os.path.join(config_dir, "general-config-development.json")
+        logging_config = os.path.join(config_dir, "logging-config-development.json")
+    else:
+        app_config = os.path.join(config_dir, "general-config.json")
+        logging_config = os.path.join(config_dir, "logging-config.json")
 
-    logger.info("App config file: %s", app_config)
-    logger.info("Logging config file: %s", logging_config)
+    # Load app configuration
+    with open(app_config, encoding="utf-8") as config_file:
+        config = json.load(config_file)
+        app.config.update(config)
 
-    # Load configuration
-    app.config.from_file(app_config, load=yaml.full_load)
+    if "SERVER_PORT" not in app.config:
+        app.config["SERVER_PORT"] = 5000
 
     # Load logging configuration and configure flask application logger
-    with open(logging_config) as stream:
-        dictConfig(yaml.full_load(stream))
+    with open(logging_config, "r", encoding="utf-8") as config_file:
+        config = json.load(config_file)
+        dictConfig(config)
+
+    logger.info(f"App config file: {app_config}")
+    logger.info(f"Logging config file: {logging_config}")
 
     # Register extensions
     register_extensions(app)
@@ -51,15 +62,13 @@ def create_app(
 
 def register_extensions(app: Flask):
     """Initialize all extensions"""
-
-    api.init_app(app)
     # Wifi bands manager extension
     wifi_5GHz_band_manager_service.init_app(app=app)
-    
+
 
 def register_apis(app: Flask):
     """Store App APIs blueprints."""
-    api = Api(app)
-    
+    # Register error handler
+    app.register_error_handler(ServerBoxException, handle_server_box_exception)
     # Register REST blueprints
-    api.add_resource(WifiStatusApi, '/wifi/status')
+    app.register_blueprint(wifi_controller_bp, url_prefix="/api")

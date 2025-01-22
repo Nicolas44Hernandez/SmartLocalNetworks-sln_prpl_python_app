@@ -21,3 +21,9 @@ coverage/
 
 # Logs
 logs/
+*.log
+# Tests
+test_pred_test_dataset.csv
+test_pred_train_dataset.csv
+y_pred_test_dataset.csv
+y_pred_train_dataset.csv

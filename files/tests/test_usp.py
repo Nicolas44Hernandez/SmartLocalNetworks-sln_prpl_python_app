@@ -9,9 +9,9 @@ class AmxUspClient:
 
     def __init__(self):
         print("initializing the AmxUspClient")
-        pamx.backend.load("/usr/bin/mods/usp/mod-amxb-usp.so")
-        pamx.backend.set_config({})
-        self.connection = pamx.bus.connect("usp:/var/run/usp/endpoint_agent_path")
+        pamx.backend.load("/usr/bin/mods/amxb/mod-amxb-usp.so")
+        pamx.backend.set_config({"usp" : {"EndpointID": "proto::python-usp"}})
+        self.connection = pamx.bus.connect("usp:/var/run/imtp/broker_agent_path")
 
     # Python AMX functions : get/set/add/delete
     def read_object(self, path: str):
@@ -33,18 +33,18 @@ class AmxUspClient:
         """Delete USP Object"""
         print(f"AMX USP Delete object: {path}")
         return self.connection.delete(path)
-    
+
 
 
 if __name__ == "__main__":
 
-    # Create interface 
-    usp_client = AmxUspClient()  
+    # Create interface
+    usp_client = AmxUspClient()
 
-    # retreive field  
+    # retreive field
     data = usp_client.read_object(path=FIELD)
     print(f"FIELD: {FIELD}")
     print(f"DATA: {data}")
 
-    
+
 

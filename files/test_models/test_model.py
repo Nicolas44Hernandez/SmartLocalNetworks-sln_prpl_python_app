@@ -34,13 +34,13 @@ model_save = f"{models_dir}/{model_name}_OPTIM.pkl"
 model_pipeline = joblib.load(model_save)
 print("Model loaded")
 
-# on train dataset : 
+# on train dataset :
 print("Predicions in train dataset...")
 y_pred = model_pipeline.predict(X_train.values)
 test_pred = model_pipeline.predict_proba(X_train.values)[:, 1]
 print("Done")
 
-# Write CLASSIFICATION Results on Train DATASET in csv file 
+# Write CLASSIFICATION Results on Train DATASET in csv file
 print("Writting results in files [y_pred_train_dataset.csv, test_pred_train_dataset.csv]")
 np.savetxt('y_pred_train_dataset.csv', y_pred, delimiter=',', fmt='%d')
 np.savetxt('test_pred_train_dataset.csv', y_pred, delimiter=',', fmt='%d')
@@ -52,7 +52,7 @@ y_pred = model_pipeline.predict(X_test.values)
 test_pred = model_pipeline.predict_proba(X_test.values)[:, 1]
 print("Done")
 
-# Write CLASSIFICATION Results on Test DATASET in csv file 
+# Write CLASSIFICATION Results on Test DATASET in csv file
 print("Writting results in files [y_pred_test_dataset.csv, test_pred_test_dataset.csv]")
 np.savetxt('y_pred_test_dataset.csv', y_pred, delimiter=',', fmt='%d')
 np.savetxt('test_pred_test_dataset.csv', y_pred, delimiter=',', fmt='%d')

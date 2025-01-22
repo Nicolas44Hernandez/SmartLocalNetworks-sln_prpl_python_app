@@ -33,23 +33,35 @@ do_install () {
         install -d ${D}/usr/server/config
         install -m 0644 ${S}/server/config/* ${D}/usr/server/config/
 
+        ### COMMON
+        install -d ${D}/usr/server/common
+        install -m 0644 ${S}/server/common/__init__.py ${D}/usr/server/common/
+        install -d ${D}/usr/server/common/exception
+        install -m 0644 ${S}/server/common/exception/* ${D}/usr/server/common/exception/
+
         # INTERFACES
         install -d ${D}/usr/server/interfaces
         install -m 0644 ${S}/server/interfaces/__init__.py ${D}/usr/server/interfaces/
+        # amx_usp_interface
         install -d ${D}/usr/server/interfaces/amx_usp_interface
         install -m 0644 ${S}/server/interfaces/amx_usp_interface/* ${D}/usr/server/interfaces/amx_usp_interface/
 
         # MANAGERS
         install -d ${D}/usr/server/managers
         install -m 0644 ${S}/server/managers/__init__.py ${D}/usr/server/managers/
+        # wifi_bands_manager
         install -d ${D}/usr/server/managers/wifi_5GHz_band_manager
         install -m 0644 ${S}/server/managers/wifi_5GHz_band_manager/* ${D}/usr/server/managers/wifi_5GHz_band_manager/
 
         # REST API
         install -d ${D}/usr/server/rest_api
         install -m 0644 ${S}/server/rest_api/__init__.py ${D}/usr/server/rest_api/
-        install -d ${D}/usr/server/rest_api/wifi_controler
-        install -m 0644 ${S}/server/rest_api/wifi_controler/* ${D}/usr/server/rest_api/wifi_controler/
+        # common
+        install -d ${D}/usr/server/rest_api/common
+        install -m 0644 ${S}/server/rest_api/common/* ${D}/usr/server/rest_api/common/
+        # wifi_controller
+        install -d ${D}/usr/server/rest_api/wifi_controller
+        install -m 0644 ${S}/server/rest_api/wifi_controller/* ${D}/usr/server/rest_api/wifi_controller/
 
         # TEST
         install -d ${D}/usr/tests
@@ -71,10 +83,9 @@ do_install () {
         install -d ${D}/usr/test_models/expected_results/LGBM_C
         install -d ${D}/usr/test_models/expected_results/MLP_C
         install -d ${D}/usr/test_models/expected_results/XGBoost_C
+        install -m 0644 ${S}/test_models/test_models.sh ${D}/usr/test_models/
         install -m 0644 ${S}/test_models/compare_results.py ${D}/usr/test_models/
-        install -m 0644 ${S}/test_models.sh ${D}/usr/
         install -m 0644 ${S}/test_models/test_model.py ${D}/usr/test_models/
-        install -m 0644 ${S}/test_models/compare_results.py ${D}/usr/test_models/
         install -m 0644 ${S}/test_models/expected_results/LGBM_C/* ${D}/usr/test_models/expected_results/LGBM_C/
         install -m 0644 ${S}/test_models/expected_results/MLP_C/* ${D}/usr/test_models/expected_results/MLP_C/
         install -m 0644 ${S}/test_models/expected_results/XGBoost_C/* ${D}/usr/test_models/expected_results/XGBoost_C/
