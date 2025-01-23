@@ -47,20 +47,18 @@ if __name__ == "__main__":
     # Create interface
     usp_client = AmxUspClient()
 
+    # GET FROM DATAMODEL
     print("GET object")
     # retreive field
     data = usp_client.read_object(path=FIELD)
     print(f"FIELD: {FIELD}")
     print(f"DATA: {data}")
 
-    # Execute method
+    # EXECUTE METHOD
     print("CALL function")
     obj, method = OBJ_METHOD
     print(f"OBJ: {obj}")
     print(f"DATA: {method}")
     data = usp_client.exec_method(obj=obj, method=method)
     print(f"DATA: {data}")
-
-
-
 

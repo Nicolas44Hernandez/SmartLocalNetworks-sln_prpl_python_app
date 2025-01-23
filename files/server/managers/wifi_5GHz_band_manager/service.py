@@ -61,6 +61,35 @@ class WifiBandsManager:
         result = {"2.4GHz": radio_air_stats_2GHz, "5GHz": radio_air_stats_5GHz}
         return result
 
+    def get_connected_stations_stats(self):
+        """Get connected stations list"""
+        connected_stations = {}
+        cmd = "Device.WiFi.AccessPoint.*.AssociatedDevice."
+        logger.info(f"Getting active stations stats - cmd:{cmd}")
+        # Retreive data from datamodel
+        try:
+            stations = self.amx_usp_interface.read_object(path=cmd)[0]
+        except ServerBoxException:
+            logger.error("Error when retreiving connected stations counters")
+            return None
+        # Loop in stations to get active stations
+        for key in stations:
+            band = "5GHz" if int(key.split("AccessPoint.")[1][0]) == 1 else "2.4GHz"
+            # Get station status (active/inactive)
+            _active = True if stations[key]["Active"] == 1 else False
+            if _active:
+                # Append band to station dict
+                stations[key]["band"] = band
+                # Get station mac address
+                _mac_address = stations[key]["MACAddress"]
+                connected_stations[_mac_address] = stations[key]
+
+        # Print connected stations mac addresses
+        logger.info(f"Connected stations MAC list: {list(connected_stations.keys())}")
+
+        # Return connected stations
+        return connected_stations
+
 
 wifi_5GHz_band_manager_service: WifiBandsManager = WifiBandsManager()
 """ Wifi manager service singleton"""

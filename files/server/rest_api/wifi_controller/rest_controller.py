@@ -47,3 +47,16 @@ class BoxRadioAirStatsApi(MethodView):
         response = jsonify({"box_radio_air_stats": box_stats})
 
         return add_cors(response)
+
+
+class ConnectedStationsStatsApi(MethodView):
+    """API to retrieve connected stations stats data"""
+
+    def get(self):
+        """Get livebox wifi 5GHz status"""
+        logger.info("GET wifi/stations/stats")
+        stations_stats = wifi_5GHz_band_manager_service.get_connected_stations_stats()
+
+        response = jsonify({"connected_stations_stats": stations_stats})
+
+        return add_cors(response)
