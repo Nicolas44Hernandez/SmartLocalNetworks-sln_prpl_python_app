@@ -16,10 +16,34 @@ class WifiStatusApi(MethodView):
     """API to retrieve wifi general status"""
 
     def get(self):
-        """Get livebox wifi status"""
+        """Get livebox wifi 5GHz status"""
         logger.info("GET wifi/")
-        status = wifi_5GHz_band_manager_service.get_band_status(band="5GHz")
+        status = wifi_5GHz_band_manager_service.get_band_status()
 
         response = jsonify({"status": status})
+
+        return add_cors(response)
+
+class BoxRadioStatsApi(MethodView):
+    """API to retrieve box stats data"""
+
+    def get(self):
+        """Get livebox wifi 5GHz status"""
+        logger.info("GET wifi/radio/stats")
+        box_stats = wifi_5GHz_band_manager_service.get_box_radio_stats()
+
+        response = jsonify({"box_radio_stats": box_stats})
+
+        return add_cors(response)
+
+class BoxRadioAirStatsApi(MethodView):
+    """API to retrieve box stats data"""
+
+    def get(self):
+        """Get livebox wifi 5GHz status"""
+        logger.info("GET wifi/radio/air-stats")
+        box_stats = wifi_5GHz_band_manager_service.get_box_radio_air_stats()
+
+        response = jsonify({"box_radio_air_stats": box_stats})
 
         return add_cors(response)
