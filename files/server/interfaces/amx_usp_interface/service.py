@@ -35,6 +35,16 @@ class AmxUspClient:
             except Exception as exc:
                 raise ServerBoxException(ErrorCode.USP_ERROR) from exc
 
+    def exec_method(self, obj:str, method: str):
+        """Exec USP method"""
+        logger.info(f"AMX USP Execute method: {obj}.{method}")
+        if pamx is not None:
+            try:
+                return self.connection.call(obj, method)
+            except Exception as exc:
+                raise ServerBoxException(ErrorCode.USP_ERROR) from exc
+
+
     def set_object(self, path: str, params: dict):
         """Set USP Object"""
         logger.info(f"AMX USP Set object: {path}  params: {params}")

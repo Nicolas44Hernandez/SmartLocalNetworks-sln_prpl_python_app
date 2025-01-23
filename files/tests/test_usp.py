@@ -3,6 +3,7 @@ import json
 
 
 FIELD  = "Device.WiFi.Radio.1.Status"
+OBJ_METHOD  = ("Device.WiFi.Radio.2","getRadioStats()")
 
 class AmxUspClient:
     """Service class for AmxUsp interface"""
@@ -18,6 +19,11 @@ class AmxUspClient:
         """Read USP Object"""
         print(f"AMX USP Read object: {path}")
         return self.connection.get(path)
+
+    def exec_method(self, obj:str, method: str):
+        """Exec USP method"""
+        print(f"AMX USP Execute method: {obj}.{method}")
+        return self.connection.call(obj, method)
 
     def set_object(self, path: str, params: dict):
         """Set USP Object"""
@@ -41,10 +47,20 @@ if __name__ == "__main__":
     # Create interface
     usp_client = AmxUspClient()
 
+    print("GET object")
     # retreive field
     data = usp_client.read_object(path=FIELD)
     print(f"FIELD: {FIELD}")
     print(f"DATA: {data}")
+
+    # Execute method
+    print("CALL function")
+    obj, method = OBJ_METHOD
+    print(f"OBJ: {obj}")
+    print(f"DATA: {method}")
+    data = usp_client.exec_method(obj=obj, method=method)
+    print(f"DATA: {data}")
+
 
 
 
