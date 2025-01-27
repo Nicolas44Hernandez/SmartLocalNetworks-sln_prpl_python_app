@@ -114,7 +114,7 @@ run the application
 ```bash
 cd /usr/srv/
 export FLASK_APP="server/app:create_app()"
-export FLASK_ENV="development"
+export FLASK_ENV="PRODUCTION"
 flask run --host '0.0.0.0' --port 6060
 ```
 
