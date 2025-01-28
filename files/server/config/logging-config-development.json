@@ -57,7 +57,7 @@
         "server.managers.box_counters_manager": {
             "level": "INFO",
             "handlers": [
-                "wifi"
+                "console"
             ],
             "propagate": false
         },
