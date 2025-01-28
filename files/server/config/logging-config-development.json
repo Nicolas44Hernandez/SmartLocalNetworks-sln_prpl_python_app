@@ -47,7 +47,14 @@
             ],
             "propagate": false
         },
-        "server.managers.wifi_bands_manager": {
+        "server.managers.wifi_5GHz_band_manager": {
+            "level": "INFO",
+            "handlers": [
+                "wifi"
+            ],
+            "propagate": false
+        },
+        "server.managers.box_counters_manager": {
             "level": "INFO",
             "handlers": [
                 "wifi"

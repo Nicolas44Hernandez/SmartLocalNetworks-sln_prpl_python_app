@@ -52,6 +52,9 @@ do_install () {
         # wifi_bands_manager
         install -d ${D}/usr/server/managers/wifi_5GHz_band_manager
         install -m 0644 ${S}/server/managers/wifi_5GHz_band_manager/* ${D}/usr/server/managers/wifi_5GHz_band_manager/
+        # box_counters_manager
+        install -d ${D}/usr/server/managers/box_counters_manager
+        install -m 0644 ${S}/server/managers/box_counters_manager/* ${D}/usr/server/managers/box_counters_manager/
 
         # REST API
         install -d ${D}/usr/server/rest_api

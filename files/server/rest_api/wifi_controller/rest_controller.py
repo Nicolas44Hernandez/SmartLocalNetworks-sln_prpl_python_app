@@ -4,6 +4,7 @@ import logging
 from flask import Blueprint, jsonify, request
 from flask.views import MethodView
 from server.managers.wifi_5GHz_band_manager import wifi_5GHz_band_manager_service
+from server.managers.box_counters_manager import box_counters_manager_service
 from server.common import ServerBoxException, ErrorCode
 from server.rest_api.common import add_cors
 
@@ -30,7 +31,7 @@ class BoxRadioStatsApi(MethodView):
     def get(self):
         """Get livebox wifi 5GHz status"""
         logger.info("GET wifi/radio/stats")
-        box_stats = wifi_5GHz_band_manager_service.get_box_radio_stats()
+        box_stats = box_counters_manager_service.get_box_radio_stats()
 
         response = jsonify({"box_radio_stats": box_stats})
 
@@ -42,7 +43,7 @@ class BoxRadioAirStatsApi(MethodView):
     def get(self):
         """Get livebox wifi 5GHz status"""
         logger.info("GET wifi/radio/air-stats")
-        box_stats = wifi_5GHz_band_manager_service.get_box_radio_air_stats()
+        box_stats = box_counters_manager_service.get_box_radio_air_stats()
 
         response = jsonify({"box_radio_air_stats": box_stats})
 
@@ -55,8 +56,21 @@ class ConnectedStationsStatsApi(MethodView):
     def get(self):
         """Get livebox wifi 5GHz status"""
         logger.info("GET wifi/stations/stats")
-        stations_stats = wifi_5GHz_band_manager_service.get_connected_stations_stats()
+        stations_stats = box_counters_manager_service.get_connected_stations_counters()
 
         response = jsonify({"connected_stations_stats": stations_stats})
+
+        return add_cors(response)
+
+
+class BoxCountersApi(MethodView):
+    """API to retrieve box stats data"""
+
+    def get(self):
+        """Get livebox wifi 5GHz status"""
+        logger.info("GET wifi/radio/air-stats")
+        box_stats = box_counters_manager_service.get_box_counters()
+
+        response = jsonify({"box_counters": box_stats})
 
         return add_cors(response)
