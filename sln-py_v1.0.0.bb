@@ -46,6 +46,9 @@ do_install () {
         # amx_usp_interface
         install -d ${D}/usr/server/interfaces/amx_usp_interface
         install -m 0644 ${S}/server/interfaces/amx_usp_interface/* ${D}/usr/server/interfaces/amx_usp_interface/
+        # mlp_interface
+        install -d ${D}/usr/server/interfaces/mlp_interface
+        install -m 0644 ${S}/server/interfaces/mlp_interface/* ${D}/usr/server/interfaces/mlp_interface/
 
         # MANAGERS
         install -d ${D}/usr/server/managers
