@@ -1,4 +1,7 @@
 {
     "API_TITLE": "SLN API",
-    "API_VERSION": "v1"
+    "API_VERSION": "v1",
+    "COUNTERS": {
+        "POLLING_PERIOD_IN_SECS": 5
+    }
 }

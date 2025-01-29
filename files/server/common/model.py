@@ -1,9 +1,12 @@
 """Data model for 5GHz band on/off manager package"""
 
+import queue
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Iterable
 
+
+samples_queue = queue.Queue()
 
 @dataclass
 class boxStatsSample:

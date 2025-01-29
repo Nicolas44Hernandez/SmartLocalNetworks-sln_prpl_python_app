@@ -36,6 +36,7 @@ do_install () {
         ### COMMON
         install -d ${D}/usr/server/common
         install -m 0644 ${S}/server/common/__init__.py ${D}/usr/server/common/
+        install -m 0644 ${S}/server/common/model.py ${D}/usr/server/common/
         install -d ${D}/usr/server/common/exception
         install -m 0644 ${S}/server/common/exception/* ${D}/usr/server/common/exception/
 
