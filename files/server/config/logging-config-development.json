@@ -18,6 +18,13 @@
             "maxBytes": 10240,
             "backupCount": 0
         },
+        "model": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "default",
+            "filename": "logs/model.log",
+            "maxBytes": 10240,
+            "backupCount": 0
+        },
         "api_rest": {
             "class": "logging.handlers.RotatingFileHandler",
             "formatter": "default",
@@ -65,6 +72,13 @@
             "level": "INFO",
             "handlers": [
                 "wifi"
+            ],
+            "propagate": false
+        },
+        "server.interfaces.mlp_interface": {
+            "level": "INFO",
+            "handlers": [
+                "model"
             ],
             "propagate": false
         }

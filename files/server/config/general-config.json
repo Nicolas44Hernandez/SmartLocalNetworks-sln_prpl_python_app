@@ -3,5 +3,6 @@
     "API_VERSION": "v1",
     "COUNTERS": {
         "POLLING_PERIOD_IN_SECS": 5
-    }
+    },
+    "MODEL": "models/MLP_C/MLP_C_OPTIM.pkl"
 }

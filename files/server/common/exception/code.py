@@ -18,6 +18,7 @@ class ErrorCode(Enum):
     UNKNOWN_BAND_WIFI = (4, 400, "Wifi band doesnt exist")
     ERROR_IN_REQUEST_ARGS = (5, 400, "Error in request parameters")
     UNKNOWN_WIFI_STATUS = (6, 400, "Wifi status doesnt exist")
+    MODEL_FILE_NOT_FOUND = (7, 500, "Model file not found")
 
     # pylint: disable=unused-argument
     def __new__(cls, *args, **kwds):

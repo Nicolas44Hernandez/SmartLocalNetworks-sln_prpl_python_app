@@ -5,6 +5,7 @@ import threading
 import queue
 from flask import Flask
 from server.interfaces.amx_usp_interface import AmxUspInterface
+from server.interfaces.mlp_interface import MlpModelInterface
 from server.common import samples_queue
 
 logger = logging.getLogger(__name__)
@@ -15,6 +16,7 @@ class WifiBandsManager(threading.Thread):
     """Manager for wifi control"""
 
     amx_usp_interface: AmxUspInterface
+    mlp_model_interface: MlpModelInterface
 
     def __init__(self, app: Flask = None) -> None:
         if app is not None:
@@ -26,6 +28,9 @@ class WifiBandsManager(threading.Thread):
             logger.info("initializing the WifiBandsManager")
             # Initialize configuration
             self.amx_usp_interface = AmxUspInterface()
+
+            # Initialize MLP model interface
+            self.mlp_model_interface = MlpModelInterface(model_path=app.config["MODEL"])
 
             # Run CountWifi bands inferences in dedicated thread
             super(WifiBandsManager, self).__init__(name="WifiBandsInferencesThread")
