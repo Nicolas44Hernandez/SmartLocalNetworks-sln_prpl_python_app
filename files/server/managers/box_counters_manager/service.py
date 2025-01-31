@@ -11,7 +11,7 @@ from server.common import ServerBoxException, ErrorCode
 from server.common.model import stationStatsSample, boxStatsSample, samples_queue
 
 if os.getenv("FLASK_ENV") == "DEVELOPMENT":
-    from server.common.mock_dev import mock_stations, mock_radio_air_stats, mock_radio_stats
+    from server.common.mock_dev import mock_stations, mock_radio_air_stats, mock_radio_stats, mock_radio_stats_2
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class CountersManager(threading.Thread):
             logger.info("initializing the CountersManager")
             # Initialize configuration
             self.amx_usp_interface = AmxUspInterface()
-            self.running = False
+            self.running = True
             self.polling_period_in_secs = app.config["COUNTERS"]["POLLING_PERIOD_IN_SECS"]
 
             # Run Counters sample dedicated thread
@@ -60,8 +60,12 @@ class CountersManager(threading.Thread):
                 # Poll connected stations counters
                 start = datetime.now()
                 connected_stations_counters = box_counters_manager_service.get_connected_stations_counters()
+                if connected_stations_counters is None:
+                    continue
                 # Poll box counters
                 box_counters = box_counters_manager_service.get_box_counters()
+                if box_counters is None:
+                    continue
                 end = datetime.now()
                 delta = end - start
                 samples_queue.put({"box_counters" : box_counters, "stations_counters": connected_stations_counters })
@@ -81,8 +85,12 @@ class CountersManager(threading.Thread):
                 logger.error(e)
                 return None
         else:
-            radio_stats_2GHz = mock_radio_stats
+            radio_stats_2GHz = mock_radio_stats_2
             radio_stats_5GHz = mock_radio_stats
+            # Increment the bytes received and sent by 5Mb
+            radio_stats_5GHz[0]["BytesReceived"] += 625000
+            radio_stats_5GHz[0]["BytesSent"] += 625000
+            radio_stats_5GHz[0]["PacketsReceived"] += 5
 
         result = {"2.4GHz": radio_stats_2GHz[0], "5GHz": radio_stats_5GHz[0]}
         return result
@@ -115,7 +123,6 @@ class CountersManager(threading.Thread):
         # Healt check
         if box_radio_stats is None or box_radio_air_stats is None:
             logger.error("Error retreiving box stats")
-            # TODO: Error management
             return None
 
         box_radio_stats_2GHz = box_radio_stats["2.4GHz"]
@@ -183,6 +190,19 @@ class CountersManager(threading.Thread):
         else:
             stations = mock_stations
 
+            # Increment for station 1
+            stations[list(stations.keys())[0]]["RxBytes"] += 625000
+            stations[list(stations.keys())[0]]["TxBytes"] += 6250000
+            stations[list(stations.keys())[0]]["RxPacketCount"] += 500
+            stations[list(stations.keys())[0]]["TxPacketCount"] += 50
+
+            # Increment for station 2
+            stations[list(stations.keys())[1]]["RxBytes"] += 62500
+            stations[list(stations.keys())[1]]["TxBytes"] += 625000
+            stations[list(stations.keys())[1]]["RxPacketCount"] += 50
+            stations[list(stations.keys())[1]]["TxPacketCount"] += 5
+
+
         # Loop in stations to get active stations
         for key in stations:
             band = "5GHz" if int(key.split("AccessPoint.")[1][0]) == 1 else "2.4GHz"
@@ -208,7 +228,6 @@ class CountersManager(threading.Thread):
         # Healt check
         if stations_stats is None:
             logger.error("Error retreiving connected stations stats")
-            # TODO: Error management
             return None
 
         # loop over connected stations

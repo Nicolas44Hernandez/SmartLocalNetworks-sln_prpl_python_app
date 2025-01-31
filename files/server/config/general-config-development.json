@@ -2,7 +2,8 @@
     "API_TITLE": "SLN API",
     "API_VERSION": "v1",
     "COUNTERS": {
-        "POLLING_PERIOD_IN_SECS": 5
+        "POLLING_PERIOD_IN_SECS": 5,
+        "PURGE_TIMER_IN_SECS": 20
     },
     "MODEL": "files/models/MLP_C/MLP_C_OPTIM.pkl"
 }

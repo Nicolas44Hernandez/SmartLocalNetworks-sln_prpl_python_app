@@ -86,7 +86,7 @@ class StationCounters:
     uplinkMCS: int
     lastDataUplinkRate: int
     lastDataDownlinkRate: int
-    SignalStrength: Iterable[int]
+    signalStrength: Iterable[int]
     uplinkShortGuard: int
     downlinkMCS: int
     avgSignalStrengthByChain: int
