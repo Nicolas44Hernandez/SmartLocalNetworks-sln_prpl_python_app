@@ -5,8 +5,8 @@ mock_radio_stats = [
     {
         "BroadcastPacketsReceived" : 0,
         "BroadcastPacketsSent" : 0,
-        "BytesReceived" : 16981,
-        "BytesSent" : 1614097,
+        "BytesReceived" : 888,
+        "BytesSent" : 999,
         "DiscardPacketsReceived" : 0,
         "DiscardPacketsSent" : 0,
         "ErrorsReceived" : 0,
@@ -74,6 +74,8 @@ mock_radio_stats = [
         },
     }
 ]
+
+mock_radio_stats_2 = [{key: value for key, value in mock_radio_stats[0].items()}]
 
 mock_radio_air_stats = [
     {
