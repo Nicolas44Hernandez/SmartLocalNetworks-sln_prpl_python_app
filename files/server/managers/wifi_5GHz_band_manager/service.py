@@ -3,16 +3,18 @@
 import logging
 import threading
 import queue
+import numpy as np
 from datetime import datetime, timedelta
 from flask import Flask
 from server.interfaces.amx_usp_interface import AmxUspInterface
 from server.interfaces.mlp_interface import MlpModelInterface
-from server.common import samples_queue, boxCounters, boxStatsSample, stationStatsSample, StationCounters
+from server.common import samples_queue, boxCounters, boxStatsSample, stationStatsSample, StationCounters, BoxDataForInferenceInput, StationDataForInferenceInput
 
 logger = logging.getLogger(__name__)
 
 BANDS = ["2.4GHz", "5GHz", "6GHz"]
 MAX_THROUGHPUT_COUNTER_VALUE = 40
+COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE = 10
 
 class WifiBandsManager(threading.Thread):
     """Manager for wifi control"""
@@ -125,7 +127,6 @@ class WifiBandsManager(threading.Thread):
                     logger.error("Error in box counters update for 2.4GHz, counters are reset")
                     self.init_counters()
                     continue
-
                 # Update stations counters
                 if not self.update_stations_counters(sample=sample_stations):
                     logger.error("Error in stations counters update, counters are reset")
@@ -138,27 +139,143 @@ class WifiBandsManager(threading.Thread):
                     self.init_counters()
                     continue
 
-                ########################### Print for testitng pruposes ###########################
-                # BOX COUNTERS
-                logger.error(
-                    f"BOX COUNTERS 2.4GHz - "
-                    f"tx_Mbps:{self.counters_2GHz.tx_Mbps}  rx_Mbps:{self.counters_2GHz.rx_Mbps}\n"
-                    f"BOX COUNTERS 5GHz - "
-                    f"tx_Mbps:{self.counters_5GHz.tx_Mbps}  rx_Mbps:{self.counters_5GHz.rx_Mbps}\n"
-                )
-                # STATIONS COUNTERS
-                if len(self.counters_stations) > 0:
-                    logger.error(
-                        ' '.join(
-                            f"\n{station}: "
-                            f"tx_Mbps:{self.counters_stations[station].tx_Mbps}  "
-                            f"rx_Mbps:{self.counters_stations[station].rx_Mbps}  "
-                            for station in self.counters_stations
-                        )
-                    )
-                ###################################################################################
+                # Perform inferences
+                if not self.perform_inferences():
+                    logger.error("Error when performing inferences, counters are reset")
+                    self.init_counters()
+                    continue
 
-                # TODO: perform inferences
+                # Print counters for debug
+                self.print_counters()
+                # TODO: evaluate band status change
+
+    def perform_inferences(self) -> bool:
+        """Perform inferences on counters data"""
+
+        if len(self.counters_2GHz.rx_Mbps) < COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE:
+            logger.info("Counters are not filled yet")
+            return True
+        FACTOR = 2.5
+        # Compute inference box counter values
+        rx_Mbps_array = [a + b for a, b in zip(self.counters_2GHz.rx_Mbps, self.counters_5GHz.rx_Mbps)]
+        tx_Mbps_array = [a + b for a, b in zip(self.counters_2GHz.tx_Mbps, self.counters_5GHz.tx_Mbps)]
+        noise = [min(a, b) for a, b in zip(self.counters_2GHz.noise, self.counters_5GHz.noise)]
+        rx_pps = self.counters_2GHz.rx_pps + self.counters_2GHz.tx_pps
+        tx_pps = self.counters_2GHz.tx_pps + self.counters_2GHz.tx_pps
+        load = self.counters_2GHz.load + (FACTOR * self.counters_5GHz.load)
+        freeTime = 100 - load
+        rxTime = self.counters_2GHz.rxTime + (FACTOR * self.counters_5GHz.rxTime)
+        vendorStats_glitch = self.counters_2GHz.vendorStats_glitch + self.counters_5GHz.vendorStats_glitch
+        obssTime = self.counters_2GHz.obssTime + self.counters_5GHz.obssTime
+        txTime = self.counters_2GHz.txTime + (FACTOR * self.counters_5GHz.txTime)
+        intTime = self.counters_2GHz.intTime + self.counters_5GHz.intTime
+        noise_air = min(self.counters_2GHz.noise_air, self.counters_5GHz.noise_air)
+        tx_err_ps = self.counters_2GHz.tx_err_ps + self.counters_5GHz.tx_err_ps
+        tx_ber = self.counters_2GHz.tx_ber + self.counters_5GHz.tx_ber
+
+        try:
+            box_data_for_inference = BoxDataForInferenceInput(
+                rx_Mbps = rx_Mbps_array[-1],
+                rx_Mbps_lag1 = rx_Mbps_array[-2],
+                rx_Mbps_lag2 = rx_Mbps_array[-3],
+                rx_Mbps_lag3 = rx_Mbps_array[-4],
+                rx_Mbps_avg3 = np.mean(rx_Mbps_array[-3:]),
+                rx_Mbps_avg5 = np.mean(rx_Mbps_array[-5:]),
+                rx_Mbps_avg7 = np.mean(rx_Mbps_array[-7:]),
+                tx_Mbps = tx_Mbps_array[-1],
+                tx_Mbps_lag1 = tx_Mbps_array[-2],
+                tx_Mbps_lag2 = tx_Mbps_array[-3],
+                tx_Mbps_lag3 = tx_Mbps_array[-4],
+                tx_Mbps_avg3 = np.mean(tx_Mbps_array[-3:]),
+                tx_Mbps_avg5 = np.mean(tx_Mbps_array[-5:]),
+                tx_Mbps_avg7 = np.mean(tx_Mbps_array[-7:]),
+                noise = noise[-1],
+                noise_lag3 = noise[-4],
+                noise_avg3 = np.mean(noise[-3:]),
+                noise_avg5 = np.mean(noise[-5:]),
+                noise_avg7 = np.mean(noise[-7:]),
+                rx_pps = rx_pps,
+                tx_pps = tx_pps,
+                load = load,
+                freeTime = freeTime,
+                rxTime = rxTime,
+                vendorStats_glitch = vendorStats_glitch,
+                obssTime = obssTime,
+                txTime = txTime,
+                intTime = intTime,
+                noise_air = noise_air,
+                tx_err_ps = tx_err_ps,
+                tx_ber = tx_ber,
+            )
+        except:
+            logger.error("Error when retreiving station counters to perform inference")
+            return False
+
+        stations_data_for_inference = []
+        # Loop over the counters stations dict
+        for station in self.counters_stations:
+            # Check that counters are already filled
+            if len(self.counters_stations[station].rx_Mbps) < COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE:
+                continue
+            # Compute station values
+            try:
+                stations_data_for_inference.append(
+                    StationDataForInferenceInput(
+                        station=station,
+                        rx_Mbps = self.counters_stations[station].rx_Mbps[-1],
+                        rx_Mbps_lag1 = self.counters_stations[station].rx_Mbps[-2],
+                        rx_Mbps_lag2 = self.counters_stations[station].rx_Mbps[-3],
+                        rx_Mbps_lag3 = self.counters_stations[station].rx_Mbps[-4],
+                        rx_Mbps_lag5 = self.counters_stations[station].rx_Mbps[-6],
+                        rx_Mbps_lag7 = self.counters_stations[station].rx_Mbps[-8],
+                        rx_Mbps_avg3 = np.mean(self.counters_stations[station].rx_Mbps[-3:]),
+                        rx_Mbps_avg5 = np.mean(self.counters_stations[station].rx_Mbps[-5:]),
+                        rx_Mbps_avg7 = np.mean(self.counters_stations[station].rx_Mbps[-7:]),
+                        rx_Mbps_avg10 = np.mean(self.counters_stations[station].rx_Mbps),
+                        tx_Mbps = self.counters_stations[station].tx_Mbps[-1],
+                        tx_Mbps_lag1 = self.counters_stations[station].tx_Mbps[-2],
+                        tx_Mbps_avg3 = np.mean(self.counters_stations[station].tx_Mbps[-3:]),
+                        tx_Mbps_avg5 = np.mean(self.counters_stations[station].tx_Mbps[-5:]),
+                        signalStrength = self.counters_stations[station].signalStrength[-1],
+                        signalStrength_lag1 = self.counters_stations[station].signalStrength[-2],
+                        signalStrength_lag2 = self.counters_stations[station].signalStrength[-3],
+                        signalStrength_lag3 = self.counters_stations[station].signalStrength[-4],
+                        signalStrength_lag5 = self.counters_stations[station].signalStrength[-6],
+                        signalStrength_lag7 = self.counters_stations[station].signalStrength[-8],
+                        signalStrength_avg3 = np.mean(self.counters_stations[station].signalStrength[-3:]),
+                        signalStrength_avg5 = np.mean(self.counters_stations[station].signalStrength[-5:]),
+                        signalStrength_avg7 = np.mean(self.counters_stations[station].signalStrength[-7:]),
+                        signalStrength_avg10 = np.mean(self.counters_stations[station].signalStrength[-10:]),
+                        rx_pps = self.counters_stations[station].rx_pps,
+                        tx_pps = self.counters_stations[station].tx_pps,
+                        uplinkMCS = self.counters_stations[station].uplinkMCS,
+                        lastDataUplinkRate = self.counters_stations[station].lastDataUplinkRate,
+                        lastDataDownlinkRate = self.counters_stations[station].lastDataDownlinkRate,
+                        uplinkShortGuard = self.counters_stations[station].uplinkShortGuard,
+                        downlinkMCS = self.counters_stations[station].downlinkMCS,
+                        avgSignalStrengthByChain = self.counters_stations[station].avgSignalStrengthByChain,
+                        signalNoiseRatio = self.counters_stations[station].signalNoiseRatio,
+                    )
+                )
+            except:
+                logger.error("Error when retreiving station counters to perform inference")
+                return False
+        inference_results = self.mlp_model_interface.perform_inference(
+            box_data=box_data_for_inference,
+            stations_data=stations_data_for_inference,
+        )
+        if not inference_results:
+            logger.error("Error when performing inferences")
+            return False
+
+        # Append results to stations counters
+        for result in inference_results:
+            if result.station in self.counters_stations:
+                if len(self.counters_stations[result.station].inferences_results) < COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE:
+                    self.counters_stations[result.station].inferences_results.append(result)
+                else:
+                    self.counters_stations[result.station].inferences_results = self.counters_stations[result.station].inferences_results[1:] + [result]
+        return True
 
     def update_box_counter(self, band: str, sample: boxStatsSample) -> bool:
         """Update box counters from sample"""
@@ -248,7 +365,7 @@ class WifiBandsManager(threading.Thread):
                 new_tx_ber = 0
 
             # Update counters arrays values
-            if len(counter_to_update.rx_Mbps) < 7:
+            if len(counter_to_update.rx_Mbps) < COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE:
                 # Arrays not completely filled
                 counter_to_update.rx_Mbps.append(new_rx_Mbps)
                 counter_to_update.tx_Mbps.append(new_tx_Mbps)
@@ -352,7 +469,7 @@ class WifiBandsManager(threading.Thread):
                 )
 
                 # Update counters arrays values
-                if len(counter_to_update.rx_Mbps) < 7:
+                if len(counter_to_update.rx_Mbps) < COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE:
                     # Arrays not completely filled
                     counter_to_update.rx_Mbps.append(new_rx_Mbps)
                     counter_to_update.tx_Mbps.append(new_tx_Mbps)
@@ -405,6 +522,45 @@ class WifiBandsManager(threading.Thread):
             return False
 
         return True
+
+    def print_counters(
+            self,
+            print_box_counters: bool = True,
+            print_stations_counters: bool = True,
+            print_inference_results: bool = True,
+        ):
+        """Print counters for debug"""
+        # BOX COUNTERS
+        if print_box_counters:
+            logger.error(
+                f"\nBOX COUNTERS 2.4GHz - "
+                f"tx_Mbps:{self.counters_2GHz.tx_Mbps}  rx_Mbps:{self.counters_2GHz.rx_Mbps}\n"
+                f"BOX COUNTERS 5GHz - "
+                f"tx_Mbps:{self.counters_5GHz.tx_Mbps}  rx_Mbps:{self.counters_5GHz.rx_Mbps}"
+            )
+        if print_stations_counters:
+            # STATIONS COUNTERS
+            if len(self.counters_stations) > 0:
+                logger.error("\nSTATIONS COUNTERS:")
+                logger.error(
+                    ' '.join(
+                        f"\n{station}: "
+                        f"tx_Mbps:{self.counters_stations[station].tx_Mbps}  "
+                        f"rx_Mbps:{self.counters_stations[station].rx_Mbps}"
+                        for station in self.counters_stations
+                    )
+                )
+        if print_inference_results:
+            # STATIONS COUNTERS
+            if len(self.counters_stations) > 0:
+                logger.error("\nINFERENCES RESULTS:")
+                logger.error(
+                    ' '.join(
+                        f"\n{station}: "
+                        f"inferences_results:[{self.counters_stations[station].inference_result_to_str()}]"
+                        for station in self.counters_stations
+                    )
+                )
 
     def get_band_status(self):
         """Execute get wifi band status command in the livebox using AMX USP """

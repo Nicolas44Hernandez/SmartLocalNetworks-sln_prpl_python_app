@@ -100,6 +100,41 @@ Add datamodel permisions to container
 ubus-cli 'LocalAgent.ControllerTrust.Role.2.Permission.+{Alias = "my-permissions", CommandEvent = "rwxn", Enable=true, InstantiatedObj = "rwxn", Obj = "rwxn", Order=1, Param="rwxn", Targets="Device.DeviceInfo.,Device.WiFi."}'
 ```
 
+## Extend LCM disk
+Stop services
+```bash
+/etc/init.d/rlyeh stop
+/etc/init.d/cthulhu stop
+/etc/init.d/syslog-ng stop
+```
+
+Unmunt previous storage location
+```bash
+busybox umount /lcm
+
+```
+Mount new storage location (usb formated in EXT4)
+```bash
+busybox mount /dev/sda1 /lcm
+
+```
+Check mount
+```bash
+df -h
+```
+
+Restart the processes
+```bash
+/etc/init.d/syslog-ng start
+/etc/init.d/cthulhu start
+/etc/init.d/rlyeh start
+```
+
+To keep it on reboot
+```bash
+echo "mount /dev/sda1 /lcm 2>&1 >/tmp/sdb_mount" > /etc/rc.d/S89_rlyeh_preinit
+chmod 777 /etc/rc.d/S89_rlyeh_preinit
+```
 
 ## Run the application
 TODO
@@ -112,7 +147,7 @@ lxc-attach <DUID>
 
 run the application
 ```bash
-cd /usr/srv/
+cd /usr
 export FLASK_APP="server/app:create_app()"
 export FLASK_ENV="PRODUCTION"
 flask run --host '0.0.0.0' --port 6060
