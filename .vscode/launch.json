@@ -12,6 +12,17 @@
             "console": "integratedTerminal"
         },
         {
+            "name": "Test models",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/files/test_models/test_model.py",
+            "console": "integratedTerminal",
+            "args": [
+                "MLP_C",
+                "files/models",
+            ]
+        },
+        {
             "name": "PRPL SLN: Run flask app in dev post",
             "type": "debugpy",
             "request": "launch",
