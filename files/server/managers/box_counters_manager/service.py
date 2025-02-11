@@ -153,24 +153,30 @@ class CountersManager(threading.Thread):
         logger.debug(f"\nbox_stats_sample_2GHz:{box_stats_sample_2GHz}\n")
 
         # Create boxStatsSample 5GHz object
-        box_stats_sample_5GHz = boxStatsSample(
-            timestamp=timestamp,
-            bytesReceived=box_radio_stats_5GHz["BytesReceived"],
-            bytesSent=box_radio_stats_5GHz["BytesSent"],
-            noise=box_radio_stats_5GHz["Noise"],
-            load=box_radio_air_stats_5GHz["Load"],
-            freeTime=box_radio_air_stats_5GHz["FreeTime"],
-            rxTime=box_radio_air_stats_5GHz["RxTime"],
-            vendorStats_glitch=box_radio_air_stats_5GHz["VendorStats"]["Glitch"],
-            obssTime=box_radio_air_stats_5GHz["ObssTime"],
-            txTime=box_radio_air_stats_5GHz["TxTime"],
-            intTime=box_radio_air_stats_5GHz["IntTime"],
-            noise_air=box_radio_air_stats_5GHz["Noise"],
-            packetsReceived=box_radio_stats_5GHz["PacketsReceived"],
-            packetsSent=box_radio_stats_5GHz["PacketsSent"],
-            errorsReceived=box_radio_stats_5GHz["ErrorsReceived"],
-            errorsSent=box_radio_stats_5GHz["ErrorsSent"],
-        )
+        # If 5GHz band is off
+        if len(box_radio_air_stats_5GHz) == 0:
+            box_stats_sample_5GHz = None
+
+        else:
+            box_stats_sample_5GHz = boxStatsSample(
+                timestamp=timestamp,
+                bytesReceived=box_radio_stats_5GHz["BytesReceived"],
+                bytesSent=box_radio_stats_5GHz["BytesSent"],
+                noise=box_radio_stats_5GHz["Noise"],
+                load=box_radio_air_stats_5GHz["Load"],
+                freeTime=box_radio_air_stats_5GHz["FreeTime"],
+                rxTime=box_radio_air_stats_5GHz["RxTime"],
+                vendorStats_glitch=box_radio_air_stats_5GHz["VendorStats"]["Glitch"],
+                obssTime=box_radio_air_stats_5GHz["ObssTime"],
+                txTime=box_radio_air_stats_5GHz["TxTime"],
+                intTime=box_radio_air_stats_5GHz["IntTime"],
+                noise_air=box_radio_air_stats_5GHz["Noise"],
+                packetsReceived=box_radio_stats_5GHz["PacketsReceived"],
+                packetsSent=box_radio_stats_5GHz["PacketsSent"],
+                errorsReceived=box_radio_stats_5GHz["ErrorsReceived"],
+                errorsSent=box_radio_stats_5GHz["ErrorsSent"],
+            )
+
         logger.debug(f"\nbox_stats_sample_5GHz:{box_stats_sample_5GHz}\n")
 
         # Return counters

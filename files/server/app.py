@@ -9,6 +9,7 @@ from flask import Flask
 # Managers
 from server.managers.wifi_5GHz_band_manager import wifi_5GHz_band_manager_service
 from server.managers.box_counters_manager import box_counters_manager_service
+from server.managers.mlp_inference_manager import mlp_inference_manager_service
 
 # Rest APIs
 from server.rest_api.wifi_controller import bp as wifi_controller_bp
@@ -67,6 +68,8 @@ def register_extensions(app: Flask):
     wifi_5GHz_band_manager_service.init_app(app=app)
     # Box counters manager extension
     box_counters_manager_service.init_app(app=app)
+    # Infernces manager
+    mlp_inference_manager_service.init_app(app=app)
 
 
 def register_apis(app: Flask):

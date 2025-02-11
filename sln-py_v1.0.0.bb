@@ -60,6 +60,10 @@ do_install () {
         install -d ${D}/usr/server/managers/box_counters_manager
         install -m 0644 ${S}/server/managers/box_counters_manager/* ${D}/usr/server/managers/box_counters_manager/
 
+        # mlp_inference_manager
+        install -d ${D}/usr/server/managers/mlp_inference_manager
+        install -m 0644 ${S}/server/managers/mlp_inference_manager/* ${D}/usr/server/managers/mlp_inference_manager/
+
         # REST API
         install -d ${D}/usr/server/rest_api
         install -m 0644 ${S}/server/rest_api/__init__.py ${D}/usr/server/rest_api/
