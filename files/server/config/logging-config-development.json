@@ -68,6 +68,13 @@
             ],
             "propagate": false
         },
+        "server.managers.mlp_interface_manager": {
+            "level": "INFO",
+            "handlers": [
+                "model"
+            ],
+            "propagate": false
+        },
         "server.interfaces.amx_usp_interface": {
             "level": "INFO",
             "handlers": [

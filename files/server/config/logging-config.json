@@ -47,6 +47,13 @@
             ],
             "propagate": false
         },
+        "server.managers.mlp_inference_manager": {
+            "level": "INFO",
+            "handlers": [
+                "console"
+            ],
+            "propagate": false
+        },
         "server.interfaces.amx_usp_interface": {
             "level": "INFO",
             "handlers": [
