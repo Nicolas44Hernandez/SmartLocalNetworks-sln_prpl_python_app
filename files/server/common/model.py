@@ -13,8 +13,16 @@ samples_queue = queue.Queue()
 class SingleStationInferenceResult:
     """Model for single station inference result"""
     station: str
-    prediction: bool
+    status: bool
     probability: float
+
+    def to_dict(self):
+        """Convert the dataclass instance to a dictionary."""
+        return {
+            "station": self.station,
+            "status": self.status,
+            "probability": self.probability,
+        }
 
 @dataclass
 class boxStatsSample:
@@ -104,7 +112,7 @@ class StationCounters:
     def inference_result_to_str(self) -> str:
         """used to print inference results"""
         return ' '.join(
-            f"({'ON' if inference_result.prediction else 'OFF'} p:{inference_result.probability:.2f}) "
+            f"({'ON' if inference_result.status else 'OFF'} p:{inference_result.probability:.2f}) "
             for inference_result in self.inferences_results
         )
 
@@ -183,3 +191,43 @@ class StationDataForInferenceInput:
     avgSignalStrengthByChain: float
     signalNoiseRatio: float
 
+
+    def to_dict(self):
+        """Convert the dataclass instance to a dictionary."""
+        return {
+
+            "station" : self.station,
+            "rx_Mbps" : self.rx_Mbps,
+            "rx_Mbps_lag1" : self.rx_Mbps_lag1,
+            "rx_Mbps_lag2" : self.rx_Mbps_lag2,
+            "rx_Mbps_lag3" : self.rx_Mbps_lag3,
+            "rx_Mbps_lag5" : self.rx_Mbps_lag5,
+            "rx_Mbps_lag7" : self.rx_Mbps_lag7,
+            "rx_Mbps_avg3" : self.rx_Mbps_avg3,
+            "rx_Mbps_avg5" : self.rx_Mbps_avg5,
+            "rx_Mbps_avg7" : self.rx_Mbps_avg7,
+            "rx_Mbps_avg10" : self.rx_Mbps_avg10,
+            "tx_Mbps" : self.tx_Mbps,
+            "tx_Mbps_lag1" : self.tx_Mbps_lag1,
+            "tx_Mbps_avg3" : self.tx_Mbps_avg3,
+            "tx_Mbps_avg5" : self.tx_Mbps_avg5,
+            "signalStrength" : self.signalStrength,
+            "signalStrength_lag1" : self.signalStrength_lag1,
+            "signalStrength_lag2" : self.signalStrength_lag2,
+            "signalStrength_lag3" : self.signalStrength_lag3,
+            "signalStrength_lag5" : self.signalStrength_lag5,
+            "signalStrength_lag7" : self.signalStrength_lag7,
+            "signalStrength_avg3" : self.signalStrength_avg3,
+            "signalStrength_avg5" : self.signalStrength_avg5,
+            "signalStrength_avg7" : self.signalStrength_avg7,
+            "signalStrength_avg10" : self.signalStrength_avg10,
+            "rx_pps" : self.rx_pps,
+            "tx_pps" : self.tx_pps,
+            "uplinkMCS" : self.uplinkMCS,
+            "lastDataUplinkRate" : self.lastDataUplinkRate,
+            "lastDataDownlinkRate" : self.lastDataDownlinkRate,
+            "uplinkShortGuard" : self.uplinkShortGuard,
+            "downlinkMCS" : self.downlinkMCS,
+            "avgSignalStrengthByChain" : self.avgSignalStrengthByChain,
+            "signalNoiseRatio" : self.signalNoiseRatio,
+        }

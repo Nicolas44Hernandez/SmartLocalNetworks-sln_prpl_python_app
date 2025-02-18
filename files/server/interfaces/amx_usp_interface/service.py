@@ -16,7 +16,7 @@ class AmxUspClient:
     """Service class for AmxUsp interface"""
 
     def __init__(self):
-        logger.info("initializing the AmxUspClient")
+        logger.debug("initializing the AmxUspClient")
         if pamx is not None:
             try:
                 pamx.backend.load("/usr/bin/mods/amxb/mod-amxb-usp.so")
@@ -28,7 +28,7 @@ class AmxUspClient:
     # Python AMX functions : get/set/add/delete
     def read_object(self, path: str):
         """Read USP Object"""
-        logger.info(f"AMX USP Read object: {path}")
+        logger.debug(f"AMX USP Read object: {path}")
         if pamx is not None:
             try:
                 return self.connection.get(path)
@@ -37,7 +37,7 @@ class AmxUspClient:
 
     def exec_method(self, obj:str, method: str):
         """Exec USP method"""
-        logger.info(f"AMX USP Execute method: {obj}.{method}")
+        logger.debug(f"AMX USP Execute method: {obj}.{method}")
         if pamx is not None:
             try:
                 return self.connection.call(obj, method)
@@ -47,7 +47,7 @@ class AmxUspClient:
 
     def set_object(self, path: str, params: dict):
         """Set USP Object"""
-        logger.info(f"AMX USP Set object: {path}  params: {params}")
+        logger.debug(f"AMX USP Set object: {path}  params: {params}")
         if pamx is not None:
             try:
                 return self.connection.set(path, params)
@@ -56,7 +56,7 @@ class AmxUspClient:
 
     def add_object(self, path, params: dict):
         """Add USP Object"""
-        logger.info(f"AMX USP Add object: {path}  params: {params}")
+        logger.debug(f"AMX USP Add object: {path}  params: {params}")
         if pamx is not None:
             try:
                 return self.connection.add(path, params)
@@ -65,7 +65,7 @@ class AmxUspClient:
 
     def del_object(self, path: str):
         """Delete USP Object"""
-        logger.info(f"AMX USP Delete object: {path}")
+        logger.debug(f"AMX USP Delete object: {path}")
         if pamx is not None:
             try:
                 return self.connection.delete(path)

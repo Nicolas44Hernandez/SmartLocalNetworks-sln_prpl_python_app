@@ -18,6 +18,20 @@
             "maxBytes": 10240,
             "backupCount": 0
         },
+        "counters": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "default",
+            "filename": "logs/counters.log",
+            "maxBytes": 10240,
+            "backupCount": 0
+        },
+        "notification": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "default",
+            "filename": "logs/notification.log",
+            "maxBytes": 10240,
+            "backupCount": 0
+        },
         "model": {
             "class": "logging.handlers.RotatingFileHandler",
             "formatter": "default",
@@ -51,6 +65,13 @@
             "level": "INFO",
             "handlers": [
                 "api_rest"
+            ],
+            "propagate": false
+        },
+        "server.notification": {
+            "level": "INFO",
+            "handlers": [
+                "notification"
             ],
             "propagate": false
         },

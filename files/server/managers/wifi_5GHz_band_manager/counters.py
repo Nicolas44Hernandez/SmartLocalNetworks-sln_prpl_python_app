@@ -341,7 +341,7 @@ class Counters():
         """Print counters for debug"""
         # BOX COUNTERS
         if print_box_counters:
-            logger.error(
+            logger.debug(
                 f"\nBOX COUNTERS 2.4GHz - "
                 f"tx_Mbps:{self.counters_2GHz.tx_Mbps}  rx_Mbps:{self.counters_2GHz.rx_Mbps}  "
                 f"noise:{self.counters_2GHz.noise}  "
@@ -356,9 +356,9 @@ class Counters():
                 f"tx_ber:{self.counters_2GHz.tx_ber}\n"
             )
             if self.counters_5GHz is None:
-                logger.error(f"BOX COUNTERS 5GHz - : None, band is OFF")
+                logger.debug(f"BOX COUNTERS 5GHz - : None, band is OFF")
             else:
-                logger.error(
+                logger.debug(
                     f"\nBOX COUNTERS 5GHz - "
                     f"tx_Mbps:{self.counters_5GHz.tx_Mbps}  rx_Mbps:{self.counters_5GHz.rx_Mbps}"
                     f"noise:{self.counters_5GHz.noise}  "
@@ -375,8 +375,8 @@ class Counters():
         if print_stations_counters:
             # STATIONS COUNTERS
             if len(self.counters_stations) > 0:
-                logger.error("\nSTATIONS COUNTERS:")
-                logger.error(
+                logger.debug("\nSTATIONS COUNTERS:")
+                logger.debug(
                     ' '.join(
                         f"\n{station}: "
                         f"tx_Mbps:{self.counters_stations[station].tx_Mbps}  "
@@ -398,8 +398,8 @@ class Counters():
         if print_inference_results:
             # STATIONS COUNTERS
             if len(self.counters_stations) > 0:
-                logger.error("\nINFERENCES RESULTS:")
-                logger.error(
+                logger.debug("\nINFERENCES RESULTS:")
+                logger.debug(
                     ' '.join(
                         f"\n{station}: "
                         f"inferences_results:[{self.counters_stations[station].inference_result_to_str()}]"

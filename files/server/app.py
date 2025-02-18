@@ -11,6 +11,9 @@ from server.managers.wifi_5GHz_band_manager import wifi_5GHz_band_manager_servic
 from server.managers.box_counters_manager import box_counters_manager_service
 from server.managers.mlp_inference_manager import mlp_inference_manager_service
 
+# Notification
+from server.notification import notification_service
+
 # Rest APIs
 from server.rest_api.wifi_controller import bp as wifi_controller_bp
 
@@ -52,6 +55,8 @@ def create_app(
     logger.info(f"App config file: {app_config}")
     logger.info(f"Logging config file: {logging_config}")
 
+    # Register notification service
+    register_notification_service(app)
     # Register extensions
     register_extensions(app)
     # Register REST APIs
@@ -70,6 +75,12 @@ def register_extensions(app: Flask):
     box_counters_manager_service.init_app(app=app)
     # Infernces manager
     mlp_inference_manager_service.init_app(app=app)
+
+
+def register_notification_service(app:Flask):
+    """Initialize notification extensions"""
+    # Notification service
+    notification_service.init_notification_module(app=app)
 
 
 def register_apis(app: Flask):

@@ -33,6 +33,13 @@
             ],
             "propagate": false
         },
+        "server.notification": {
+            "level": "INFO",
+            "handlers": [
+                "console"
+            ],
+            "propagate": false
+        },
         "server.managers.wifi_5GHz_band_manager": {
             "level": "INFO",
             "handlers": [

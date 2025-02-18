@@ -197,7 +197,7 @@ class MlpModel:
             inference_results.append(
                 SingleStationInferenceResult(
                     station=station_data.station,
-                    prediction=bool(prediction[idx]),
+                    status=bool(prediction[idx]),
                     probability=float(probability[idx]),
                 )
             )

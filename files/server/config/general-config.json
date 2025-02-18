@@ -5,5 +5,18 @@
         "POLLING_PERIOD_IN_SECS": 5,
         "PURGE_TIMER_IN_SECS": 20
     },
-    "MODEL": "models/MLP_C/MLP_C_OPTIM.pkl"
+    "MODEL": "models/MLP_C/MLP_C_OPTIM.pkl",
+    "WEB_SERVER": {
+        "IP_ADDRESS": "192.168.102.12",
+        "PORT": 3000,
+        "PATHS": {
+            "GENERAL_NOTIFICATION": "/api-sln/sample/",
+            "BAND_STATUS": "/api-sln/band_status/",
+            "BOX_TRAFFIC": "/api-sln/traffic/box",
+            "STATIONS_TRAFFIC": "/api-sln/traffic/stations",
+            "BOX_COUNTERS": "/api-sln/counters/box",
+            "STATIONS_COUNTERS": "/api-sln/counters/stations",
+            "INFERENCES_RESULTS": "/api-sln/inference_results/"
+        }
+    }
 }
