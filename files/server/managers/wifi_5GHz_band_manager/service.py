@@ -12,6 +12,7 @@ from server.interfaces.amx_usp_interface import AmxUspInterface
 from server.interfaces.mlp_interface import MlpModelInterface
 from server.common import samples_queue, BoxDataForInferenceInput, StationDataForInferenceInput
 from server.managers.mlp_inference_manager import mlp_inference_manager_service
+from server.notification import notification_service
 from .counters import Counters
 from .common import COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE
 
@@ -104,13 +105,24 @@ class WifiBandsManager(threading.Thread, Counters):
                 # Append results to stations counters
                 self.append_inference_results_to_counters(inference_results=inference_results)
 
-                # TODO: post to web server
 
                 # Print counters for debug
-                self.print_counters()
+                self.print_counters(print_box_counters=False, print_stations_counters=False, print_inference_results=False)
 
                 # Evaluate band status change
-                self.update_band_status_if_necessary()
+                current_band_status = True if self.update_band_status_if_necessary() == "True" else False
+
+                # Notify web server
+                notification_service.notify_sample_to_web_server(
+                    band_status=current_band_status,
+                    box_data_for_inference=box_data_for_inference,
+                    stations_data_for_inference=stations_data_for_inference,
+                    box_counter_2GHz=self.counters_2GHz,
+                    box_counter_5GHz=self.counters_5GHz,
+                    stations_counters=self.counters_stations,
+                    inference_results=inference_results,
+                    timestamp=sample_2GHz.timestamp,
+                )
 
     def get_inferece_input_from_counters(self) -> Tuple[bool, BoxDataForInferenceInput, Iterable[StationDataForInferenceInput]]:
         """
@@ -119,7 +131,7 @@ class WifiBandsManager(threading.Thread, Counters):
         """
 
         if len(self.counters_2GHz.rx_Mbps) < COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE:
-            logger.info("Counters are not filled yet")
+            logger.debug("Counters are not filled yet")
             return True, None, None
 
         # If 5GHz band is OFF, counter is None
@@ -251,12 +263,11 @@ class WifiBandsManager(threading.Thread, Counters):
 
         return True, box_data_for_inference, stations_data_for_inference
 
-
-
-
-
-    def update_band_status_if_necessary(self):
-        """Evaluate band status and switch if necessary"""
+    def update_band_status_if_necessary(self) -> bool:
+        """
+        Evaluate band status and switch if necessary
+        Return: band status
+        """
         now = datetime.now()
         if os.getenv("FLASK_ENV") != "DEVELOPMENT":
             current_band_status = self.get_band_status()
@@ -268,32 +279,32 @@ class WifiBandsManager(threading.Thread, Counters):
             counters_stations=self.counters_stations
         )
         if len(inferences) == 0:
-            return
+            return current_band_status
 
         # If the 5 GHz band is ON:
         # If for all the stations the inference result is OFF -> then turn OFF the band
         # Else keep the band ON
         if current_band_status == "Up":
             for prediction in inferences:
-                if prediction.prediction:
-                    logger.error(f"Station {prediction.station} inference requires the band ON, the 5GHz band remains ON")
-                    return
-            logger.error(f"Setting 5GHz band OFF")
+                if prediction.status:
+                    logger.info(f"Station {prediction.station} inference requires the band ON, the 5GHz band remains ON")
+                    return current_band_status
+            logger.info(f"Setting 5GHz band OFF")
             self.set_band_status(new_status=False)
-            return
+            return current_band_status
 
         # If the 5 GHz band is OFF:
         # If for at least one stations the inference result is ON -> then turn ON the band
         # Else keep the band OFF
         else:
             for prediction in inferences:
-                if prediction.prediction:
-                    logger.error(f"Station {prediction.station} inference requires the band ON")
-                    logger.error(f"Setting 5GHz band ON")
+                if prediction.status:
+                    logger.info(f"Station {prediction.station} inference requires the band ON")
+                    logger.info(f"Setting 5GHz band ON")
                     self.set_band_status(new_status=True)
-                    return
-            logger.error(f"5GHz band will remain OFF")
-            return
+                    return current_band_status
+            logger.info(f"5GHz band will remain OFF")
+            return current_band_status
 
     def get_band_status(self):
         """Execute get wifi band status command in the livebox using AMX USP """
@@ -312,9 +323,11 @@ class WifiBandsManager(threading.Thread, Counters):
         # Retrieve path and params
         path = "Device.WiFi.Radio.2"
         params = {"Enable": "1"} if new_status else {"Enable": "0"}
+
         logger.info(f"Setting wifi 5GHz band status to {new_status}")
-        ret = self.amx_usp_interface.set_object(path=path, params=params)
-        logger.info(f"Response: {ret}")
+
+        self.amx_usp_interface.set_object(path=path, params=params)
+
         return
 
 
