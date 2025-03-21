@@ -92,18 +92,9 @@ class Notification():
 
         # Notify inferences results
         if len(inference_results) > 0:
+            self.notify_inferences_results(inference_results=inference_results, timestamp_str=timestamp_str)
 
-            data = [inference_data.to_dict() for inference_data in inference_results]
 
-            for station in data:
-                station["timestamp"] = timestamp_str
-
-            self.http_post_in_dedicated_thread(
-                url=self.web_server_ip_addr,
-                port=self.web_server_port,
-                endpoint=self.web_server_inference_results_notification_path,
-                data=data,
-            )
 
     def notify_band_status(self, band_status: bool, timestamp_str: str):
         """Notify band status in dedicated thread"""
@@ -129,7 +120,7 @@ class Notification():
                 "timestamp": timestamp_str,
                 "band": "2.4GHz",
                 "rx_Mbps": box_counter_2GHz.rx_Mbps[-1],
-                "tx_Mbps": box_counter_2GHz.rx_Mbps[-1],
+                "tx_Mbps": box_counter_2GHz.tx_Mbps[-1],
             }
         )
         # If 5GHz band is ON notify traffic
@@ -142,7 +133,7 @@ class Notification():
                     "timestamp": timestamp_str,
                     "band": "5GHz",
                     "rx_Mbps": box_counter_5GHz.rx_Mbps[-1],
-                    "tx_Mbps": box_counter_5GHz.rx_Mbps[-1],
+                    "tx_Mbps": box_counter_5GHz.tx_Mbps[-1],
                 }
             )
 
@@ -223,6 +214,20 @@ class Notification():
             url=self.web_server_ip_addr,
             port=self.web_server_port,
             endpoint=self.web_server_stations_counters_notification_path,
+            data=data,
+        )
+
+    def notify_inferences_results(self, inference_results: Iterable[SingleStationInferenceResult], timestamp_str: str):
+        """Notify inferences results in dedicated thread"""
+        data = [inference_data.to_dict() for inference_data in inference_results]
+
+        for station in data:
+            station["timestamp"] = timestamp_str
+
+        self.http_post_in_dedicated_thread(
+            url=self.web_server_ip_addr,
+            port=self.web_server_port,
+            endpoint=self.web_server_inference_results_notification_path,
             data=data,
         )
 
