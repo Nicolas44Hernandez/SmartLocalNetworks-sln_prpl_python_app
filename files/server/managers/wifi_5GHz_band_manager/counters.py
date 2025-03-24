@@ -322,9 +322,9 @@ class Counters():
 
         return True
 
-    def append_inference_results_to_counters(self, inference_results: Iterable[SingleStationInferenceResult]):
+    def append_inferences_results_to_counters(self, inferences_results: Iterable[SingleStationInferenceResult]):
         """Append inference results to class counters"""
-        for result in inference_results:
+        for result in inferences_results:
             if result.station in self.counters_stations:
                 if len(self.counters_stations[result.station].inferences_results) < COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE:
                     self.counters_stations[result.station].inferences_results.append(result)
@@ -336,7 +336,7 @@ class Counters():
             self,
             print_box_counters: bool = True,
             print_stations_counters: bool = True,
-            print_inference_results: bool = True,
+            print_inferences_results: bool = True,
         ):
         """Print counters for debug"""
         # BOX COUNTERS
@@ -395,7 +395,7 @@ class Counters():
                     )
                 )
 
-        if print_inference_results:
+        if print_inferences_results:
             # STATIONS COUNTERS
             if len(self.counters_stations) > 0:
                 logger.debug("\nINFERENCES RESULTS:")

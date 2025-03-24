@@ -232,9 +232,6 @@ data_values = np.array([data])
 y_pred_single_df = model_pipeline.predict(data_values)
 test_pred_single_df = model_pipeline.predict_proba(data_values)[:, 1]
 
-a = 4
-
-
 
 
 # Write CLASSIFICATION Results on Train DATASET in csv file

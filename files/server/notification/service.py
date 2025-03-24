@@ -8,7 +8,7 @@ import urllib.parse
 from flask import Flask
 from datetime import datetime
 from typing import Iterable
-from server.common import BoxDataForInferenceInput, StationDataForInferenceInput, boxCounters, StationCounters, SingleStationInferenceResult
+from server.common import BoxDataForInferenceInput, StationDataForInferenceInput, boxCounters, StationCounters, SingleStationInferenceResult, boxStatsSample, stationStatsSample, InferencesInput
 
 POST_TIMEOUT_IN_SECS = 2
 
@@ -26,7 +26,7 @@ class Notification():
     web_server_stations_traffic_notification_path: str
     web_server_box_counters_notification_path: str
     web_server_stations_counters_notification_path: str
-    web_server_inference_results_notification_path: str
+    web_server_inferences_results_notification_path: str
 
 
     def __init__(self, app: Flask = None) -> None:
@@ -47,18 +47,17 @@ class Notification():
         self.web_server_stations_traffic_notification_path = app.config["WEB_SERVER"]["PATHS"]["STATIONS_TRAFFIC"]
         self.web_server_box_counters_notification_path = app.config["WEB_SERVER"]["PATHS"]["BOX_COUNTERS"]
         self.web_server_stations_counters_notification_path = app.config["WEB_SERVER"]["PATHS"]["STATIONS_COUNTERS"]
-        self.web_server_inference_results_notification_path = app.config["WEB_SERVER"]["PATHS"]["INFERENCES_RESULTS"]
+        self.web_server_inferences_results_notification_path = app.config["WEB_SERVER"]["PATHS"]["INFERENCES_RESULTS"]
 
 
     def notify_sample_to_web_server(
         self,
         band_status: bool,
-        box_data_for_inference: BoxDataForInferenceInput,
-        stations_data_for_inference: StationDataForInferenceInput,
         box_counter_2GHz: boxCounters,
         box_counter_5GHz: boxCounters,
         stations_counters: Iterable[StationCounters],
-        inference_results: Iterable[SingleStationInferenceResult],
+        inferences_input: InferencesInput,
+        inferences_results: Iterable[SingleStationInferenceResult],
         timestamp: datetime
     ):
         """Notify sample to web server"""
@@ -81,18 +80,9 @@ class Notification():
         if len(stations_counters) > 0:
             self.notify_stations_traffic(stations_counters=stations_counters, timestamp_str=timestamp_str)
 
-
-        # Notify box counters
-        if box_data_for_inference is not None:
-            self.notify_box_counters(box_data_for_inference=box_data_for_inference, timestamp_str=timestamp_str)
-
-        # Notify stations counters
-        if stations_data_for_inference is not None:
-            self.notify_stations_counters(stations_data_for_inference=stations_data_for_inference, timestamp_str=timestamp_str)
-
         # Notify inferences results
-        if len(inference_results) > 0:
-            self.notify_inferences_results(inference_results=inference_results, timestamp_str=timestamp_str)
+        if len(inferences_results) > 0:
+            self.notify_inferences(inferences_input=inferences_input, inferences_results=inferences_results, timestamp_str=timestamp_str)
 
 
 
@@ -159,56 +149,20 @@ class Notification():
             data=stations_traffic
         )
 
-    def notify_box_counters(self, box_data_for_inference: BoxDataForInferenceInput, timestamp_str: str):
+    def notify_box_counters(self, box_counters: boxStatsSample):
         """Notify box counters in dedicated thread"""
 
         self.http_post_in_dedicated_thread(
-                url=self.web_server_ip_addr,
-                port=self.web_server_port,
-                endpoint=self.web_server_box_counters_notification_path,
-                data={
-                    "timestamp": timestamp_str,
-                    "rx_Mbps": box_data_for_inference.rx_Mbps,
-                    "rx_Mbps_lag1":  box_data_for_inference.rx_Mbps_lag1,
-                    "rx_Mbps_lag2":  box_data_for_inference.rx_Mbps_lag2,
-                    "rx_Mbps_lag3":  box_data_for_inference.rx_Mbps_lag3,
-                    "rx_Mbps_avg3":  box_data_for_inference.rx_Mbps_avg3,
-                    "rx_Mbps_avg5":  box_data_for_inference.rx_Mbps_avg5,
-                    "rx_Mbps_avg7":  box_data_for_inference.rx_Mbps_avg7,
-                    "tx_Mbps": box_data_for_inference.tx_Mbps,
-                    "tx_Mbps_lag1": box_data_for_inference.tx_Mbps_lag1,
-                    "tx_Mbps_lag2": box_data_for_inference.tx_Mbps_lag2,
-                    "tx_Mbps_lag3": box_data_for_inference.tx_Mbps_lag3,
-                    "tx_Mbps_avg3": box_data_for_inference.tx_Mbps_avg3,
-                    "tx_Mbps_avg5": box_data_for_inference.tx_Mbps_avg5,
-                    "tx_Mbps_avg7": box_data_for_inference.tx_Mbps_avg7,
-                    "noise": box_data_for_inference.noise,
-                    "noise_lag3": box_data_for_inference.noise_lag3,
-                    "noise_avg3": box_data_for_inference.noise_avg3,
-                    "noise_avg5": box_data_for_inference.noise_avg5,
-                    "noise_avg7": box_data_for_inference.noise_avg7,
-                    "rx_pps": box_data_for_inference.rx_pps,
-                    "tx_pps": box_data_for_inference.tx_pps,
-                    "load": box_data_for_inference.load,
-                    "freeTime": box_data_for_inference.freeTime,
-                    "rxTime": box_data_for_inference.rxTime,
-                    "vendorStats_glitch": box_data_for_inference.vendorStats_glitch,
-                    "obssTime": box_data_for_inference.obssTime,
-                    "txTime": box_data_for_inference.txTime,
-                    "intTime": box_data_for_inference.intTime,
-                    "noise_air": box_data_for_inference.noise_air,
-                    "tx_err_ps": box_data_for_inference.tx_err_ps,
-                    "tx_ber" : box_data_for_inference.tx_ber,
-                    },
-            )
+            url=self.web_server_ip_addr,
+            port=self.web_server_port,
+            endpoint=self.web_server_box_counters_notification_path,
+            data=box_counters.to_dict(),
+        )
 
-    def notify_stations_counters(self, stations_data_for_inference: StationDataForInferenceInput, timestamp_str: str):
+    def notify_stations_counters(self, stations_counters: Iterable[stationStatsSample]):
         """Notify stations counters in dedicated thread"""
 
-        data = [station_data.to_dict() for station_data in stations_data_for_inference]
-
-        for station in data:
-            station["timestamp"] = timestamp_str
+        data = [counters.to_dict() for counters in stations_counters]
 
         self.http_post_in_dedicated_thread(
             url=self.web_server_ip_addr,
@@ -217,17 +171,44 @@ class Notification():
             data=data,
         )
 
-    def notify_inferences_results(self, inference_results: Iterable[SingleStationInferenceResult], timestamp_str: str):
-        """Notify inferences results in dedicated thread"""
-        data = [inference_data.to_dict() for inference_data in inference_results]
+    def notify_inferences(
+            self,
+            inferences_input: InferencesInput,
+            inferences_results: Iterable[SingleStationInferenceResult],
+            timestamp_str: str,
+        ):
 
-        for station in data:
-            station["timestamp"] = timestamp_str
+        """Notify inferences results in dedicated thread"""
+        data = []
+        for station_data, inference_result in zip(inferences_input.stations_data, inferences_results):
+            # Create inference dict
+            inference_dict = {}
+            # Extract station
+            inference_dict["station"] = station_data.station
+            # Extract station inference input data
+            input_data_dict = station_data.to_dict()
+            # Remove station key:value from station dict
+            del input_data_dict['station']
+            # Extract box inference input data
+            box_input_data_dict = inferences_input.box_data.to_dict()
+            # Fusion station input data and box input data
+            input_data_dict.update(box_input_data_dict)
+            # Extract result data
+            inference_result_dict = inference_result.to_dict()
+            del inference_result_dict['station']
+
+            # Append to inference dict
+            inference_dict["input"] = input_data_dict
+            inference_dict["result"] = inference_result_dict
+            inference_dict["timestamp"] = timestamp_str
+
+            # Append inference dict to data to post
+            data.append(inference_dict)
 
         self.http_post_in_dedicated_thread(
             url=self.web_server_ip_addr,
             port=self.web_server_port,
-            endpoint=self.web_server_inference_results_notification_path,
+            endpoint=self.web_server_inferences_results_notification_path,
             data=data,
         )
 

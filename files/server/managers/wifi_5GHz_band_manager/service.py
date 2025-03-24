@@ -10,7 +10,7 @@ from typing import Iterable, Tuple
 from flask import Flask
 from server.interfaces.amx_usp_interface import AmxUspInterface
 from server.interfaces.mlp_interface import MlpModelInterface
-from server.common import samples_queue, BoxDataForInferenceInput, StationDataForInferenceInput
+from server.common import samples_queue, BoxDataForInferenceInput, StationDataForInferenceInput, InferencesInput
 from server.managers.mlp_inference_manager import mlp_inference_manager_service
 from server.notification import notification_service
 from .counters import Counters
@@ -86,16 +86,15 @@ class WifiBandsManager(threading.Thread, Counters):
                     continue
 
                 # Get inference inputs
-                ret, box_data_for_inference, stations_data_for_inference = self.get_inferece_input_from_counters()
+                ret, inference_input = self.get_inferences_input_from_counters()
                 if not ret:
                     logger.error("Error when creating inference input objects from counters, counters are reset")
                     self.init_counters()
                     continue
 
                 # Perform inferences
-                ret, inference_results = mlp_inference_manager_service.perform_inferences(
-                    box_data_for_inference=box_data_for_inference,
-                    stations_data_for_inference=stations_data_for_inference
+                ret, inferences_results = mlp_inference_manager_service.perform_inferences(
+                    inference_input=inference_input,
                 )
                 if not ret:
                     logger.error("Error when performing inferences, counters are reset")
@@ -103,36 +102,36 @@ class WifiBandsManager(threading.Thread, Counters):
                     continue
 
                 # Append results to stations counters
-                self.append_inference_results_to_counters(inference_results=inference_results)
+                self.append_inferences_results_to_counters(inferences_results=inferences_results)
 
 
                 # Print counters for debug
-                self.print_counters(print_box_counters=False, print_stations_counters=False, print_inference_results=False)
+                self.print_counters(print_box_counters=False, print_stations_counters=False, print_inferences_results=True)
 
                 # Evaluate band status change
-                current_band_status = True if self.update_band_status_if_necessary() == "True" else False
+                current_band_status = True if self.update_band_status_if_necessary() == "Up" else False
+                #logger.error(f"current_band_status: {current_band_status}")
 
                 # Notify web server
                 notification_service.notify_sample_to_web_server(
                     band_status=current_band_status,
-                    box_data_for_inference=box_data_for_inference,
-                    stations_data_for_inference=stations_data_for_inference,
                     box_counter_2GHz=self.counters_2GHz,
                     box_counter_5GHz=self.counters_5GHz,
                     stations_counters=self.counters_stations,
-                    inference_results=inference_results,
+                    inferences_input=inference_input,
+                    inferences_results=inferences_results,
                     timestamp=sample_2GHz.timestamp,
                 )
 
-    def get_inferece_input_from_counters(self) -> Tuple[bool, BoxDataForInferenceInput, Iterable[StationDataForInferenceInput]]:
+    def get_inferences_input_from_counters(self) -> Tuple[bool, Iterable[InferencesInput]]:
         """
-        Create BoxDataForInferenceInput and [StationDataForInferenceInput] from counters to
+        Create InferencesInput object from counters to
         perform inferences
         """
 
         if len(self.counters_2GHz.rx_Mbps) < COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE:
             logger.debug("Counters are not filled yet")
-            return True, None, None
+            return True, None
 
         # If 5GHz band is OFF, counter is None
         if self.counters_5GHz is None:
@@ -142,7 +141,7 @@ class WifiBandsManager(threading.Thread, Counters):
             noise = self.counters_2GHz.noise
             rx_pps = self.counters_2GHz.rx_pps
             tx_pps = self.counters_2GHz.tx_pps
-            load = self.counters_2GHz.load
+            load = self.counters_2GHz.load if self.counters_2GHz.load >= 100 else 100
             freeTime = 100 - load
             rxTime = self.counters_2GHz.rxTime
             vendorStats_glitch = self.counters_2GHz.vendorStats_glitch
@@ -160,13 +159,18 @@ class WifiBandsManager(threading.Thread, Counters):
             noise = [min(a, b) for a, b in zip(self.counters_2GHz.noise, self.counters_5GHz.noise)]
             rx_pps = self.counters_2GHz.rx_pps + self.counters_2GHz.tx_pps
             tx_pps = self.counters_2GHz.tx_pps + self.counters_2GHz.tx_pps
-            load = self.counters_2GHz.load + (FACTOR * self.counters_5GHz.load)
+            _interim_load = self.counters_2GHz.load + (FACTOR * self.counters_5GHz.load)
+            load = _interim_load if _interim_load >= 100 else 100
             freeTime = 100 - load
-            rxTime = self.counters_2GHz.rxTime + (FACTOR * self.counters_5GHz.rxTime)
+            _interim_rxTime = self.counters_2GHz.rxTime + (FACTOR * self.counters_5GHz.rxTime)
+            rxTime = _interim_rxTime if _interim_rxTime >= 100 else 100
             vendorStats_glitch = self.counters_2GHz.vendorStats_glitch + self.counters_5GHz.vendorStats_glitch
-            obssTime = self.counters_2GHz.obssTime + self.counters_5GHz.obssTime
-            txTime = self.counters_2GHz.txTime + (FACTOR * self.counters_5GHz.txTime)
-            intTime = self.counters_2GHz.intTime + self.counters_5GHz.intTime
+            _interim_obssTime = self.counters_2GHz.obssTime + (FACTOR * self.counters_5GHz.obssTime)
+            obssTime = _interim_obssTime if _interim_obssTime >= 100 else 100
+            _interim_txTime = self.counters_2GHz.txTime + (FACTOR * self.counters_5GHz.txTime)
+            txTime = _interim_txTime if _interim_txTime >= 100 else 100
+            _interim_intTime = self.counters_2GHz.intTime + (FACTOR * self.counters_5GHz.intTime)
+            intTime = _interim_intTime if _interim_intTime >= 100 else 100
             noise_air = min(self.counters_2GHz.noise_air, self.counters_5GHz.noise_air)
             tx_err_ps = self.counters_2GHz.tx_err_ps + self.counters_5GHz.tx_err_ps
             tx_ber = self.counters_2GHz.tx_ber + self.counters_5GHz.tx_ber
@@ -208,7 +212,7 @@ class WifiBandsManager(threading.Thread, Counters):
             )
         except:
             logger.error("Error when retreiving box counters to perform inference")
-            return False, None, None
+            return False, None
 
         # Create StationDataForInferenceInput for each station
         stations_data_for_inference = []
@@ -259,9 +263,9 @@ class WifiBandsManager(threading.Thread, Counters):
                 )
             except:
                 logger.error("Error when retreiving station counters to perform inference")
-                return False, None, None
+                return False, None
 
-        return True, box_data_for_inference, stations_data_for_inference
+        return True, InferencesInput(box_data=box_data_for_inference, stations_data=stations_data_for_inference)
 
     def update_band_status_if_necessary(self) -> bool:
         """
