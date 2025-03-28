@@ -5,7 +5,8 @@
         "POLLING_PERIOD_IN_SECS": 5,
         "PURGE_TIMER_IN_SECS": 20
     },
-    "MODEL": "models/MLP_C/MLP_C_OPTIM.pkl",
+    "MODEL": "models/MLP_12_3/MLP_12_3_OPTIM.pkl",
+    "PREDICTIONS_THRESHOLD": 0.5,
     "WEB_SERVER": {
         "IP_ADDRESS": "192.168.102.12",
         "PORT": 3000,

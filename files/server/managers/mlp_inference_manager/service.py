@@ -25,7 +25,10 @@ class MlpInferenceManager():
             logger.info("initializing the MlpInferenceManager")
 
             # Initialize MLP model interface
-            self.mlp_model_interface = MlpModelInterface(model_path=app.config["MODEL"])
+            self.mlp_model_interface = MlpModelInterface(
+                model_path=app.config["MODEL"],
+                predictions_threshold=app.config["PREDICTIONS_THRESHOLD"]
+            )
 
 
     def perform_inferences(

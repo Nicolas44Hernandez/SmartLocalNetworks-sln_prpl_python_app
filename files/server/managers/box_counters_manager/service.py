@@ -261,9 +261,11 @@ class CountersManager(threading.Thread):
                 avgSignalStrengthByChain=stations_stats[station]["AvgSignalStrengthByChain"],
                 uplinkShortGuard=stations_stats[station]["UplinkShortGuard"],
                 downlinkMCS=stations_stats[station]["DownlinkMCS"],
+                inactive=stations_stats[station]["Inactive"],
                 signalNoiseRatio=stations_stats[station]["SignalNoiseRatio"],
                 rxPacketCount=stations_stats[station]["RxPacketCount"],
                 txPacketCount=stations_stats[station]["TxPacketCount"],
+                txErrors=stations_stats[station]["TxErrors"],
                 timestamp=timestamp,
             )
             stations_counters[station] = counter

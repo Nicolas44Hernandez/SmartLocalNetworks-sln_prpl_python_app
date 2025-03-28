@@ -85,25 +85,12 @@ do_install () {
 
         # MODELS
         install -d ${D}/usr/models
-        install -d ${D}/usr/models/LGBM_C
-        install -d ${D}/usr/models/MLP_C
-        install -d ${D}/usr/models/XGBoost_C
-        install -m 0644 ${S}/models/LGBM_C/* ${D}/usr/models/LGBM_C/
-        install -m 0644 ${S}/models/MLP_C/* ${D}/usr/models/MLP_C/
-        install -m 0644 ${S}/models/XGBoost_C/* ${D}/usr/models/XGBoost_C/
+        install -d ${D}/usr/models/MLP_12_3
+        install -m 0644 ${S}/models/MLP_12_3/* ${D}/usr/models/MLP_12_3/
 
         # TEST MODELS
         install -d ${D}/usr/test_models
-        install -d ${D}/usr/test_models/expected_results
-        install -d ${D}/usr/test_models/expected_results/LGBM_C
-        install -d ${D}/usr/test_models/expected_results/MLP_C
-        install -d ${D}/usr/test_models/expected_results/XGBoost_C
-        install -m 0644 ${S}/test_models/test_models.sh ${D}/usr/test_models/
-        install -m 0644 ${S}/test_models/compare_results.py ${D}/usr/test_models/
         install -m 0644 ${S}/test_models/test_model.py ${D}/usr/test_models/
-        install -m 0644 ${S}/test_models/expected_results/LGBM_C/* ${D}/usr/test_models/expected_results/LGBM_C/
-        install -m 0644 ${S}/test_models/expected_results/MLP_C/* ${D}/usr/test_models/expected_results/MLP_C/
-        install -m 0644 ${S}/test_models/expected_results/XGBoost_C/* ${D}/usr/test_models/expected_results/XGBoost_C/
 }
 
 FILES:${PN} += "/usr/server/*"

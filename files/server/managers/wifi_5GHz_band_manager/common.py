@@ -8,7 +8,6 @@ MAX_THROUGHPUT_COUNTER_VALUE = 40
 COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE = 10
 
 def create_box_counter(sample: boxStatsSample):
-
     """Create a new box counter"""
     return boxCounters(
         last_sample_timestamp = sample.timestamp,
@@ -31,7 +30,7 @@ def create_box_counter(sample: boxStatsSample):
         noise_air = sample.noise_air,
         last_errorsReceived = sample.errorsReceived,
         last_errorsSent = sample.errorsSent,
-        tx_err_ps = None,
+        tx_err_pps = None,
         tx_ber = None,
     )
 
@@ -54,10 +53,14 @@ def create_stations_counter(station: str, sample: stationStatsSample):
             signalStrength = [],
             uplinkShortGuard = sample.uplinkShortGuard,
             downlinkMCS = sample.downlinkMCS,
+            inactive=sample.inactive,
             avgSignalStrengthByChain = sample.avgSignalStrengthByChain,
             signalNoiseRatio = sample.avgSignalStrengthByChain,
-            band= None, # TODO: necessary ?
-            inferences_results = [],  # TODO: necessary ?
+            last_txErrors = sample.txErrors, # Doble check creation avec Gilles
+            tx_err_pps = None ,
+            tx_ber = None,
+            band= None,
+            inferences_results = [],
         )
 
 def convert_incremental_values_in_instantaneous_values(

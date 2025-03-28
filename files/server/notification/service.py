@@ -220,7 +220,7 @@ class Notification():
             # Convert the data to JSON format
             json_data = json.dumps(data)
             # Create a connection
-            logger.info(f"Connecting to url: {url} port: {port}")
+            logger.debug(f"Connecting to url: {url} port: {port}")
             conn = http.client.HTTPConnection(url, port, timeout=timeout)
             # Make the headers
             headers = {
@@ -231,7 +231,7 @@ class Notification():
             conn.request("POST", endpoint, body=json_data, headers=headers)
             # Get the response
             response = conn.getresponse()
-            logger.info(f"Server response status: {response.status}")
+            logger.debug(f"Server response status: {response.status}")
             if response.status != 201:
                 logger.error(
                     f"Error when posting to web server: {response.status} - {response.reason}"

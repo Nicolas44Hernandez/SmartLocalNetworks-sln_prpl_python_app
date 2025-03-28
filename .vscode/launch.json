@@ -12,13 +12,13 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Test models",
+            "name": "Test MLP model",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/files/test_models/test_model.py",
             "console": "integratedTerminal",
             "args": [
-                "MLP_C",
+                "MLP_12_3",
                 "files/models",
             ]
         },
