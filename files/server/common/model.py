@@ -26,7 +26,7 @@ class SingleStationInferenceResult:
 
 @dataclass
 class boxStatsSample:
-    timestamp: datetime
+    band: str
     bytesReceived: int
     bytesSent: int
     noise: int
@@ -42,10 +42,34 @@ class boxStatsSample:
     packetsSent: int  # pps
     errorsReceived: int # tx_ber / tx_err_ps
     errorsSent: int # tx_ber / tx_err_ps
+    timestamp: datetime
+
+    def to_dict(self):
+        """Convert the dataclass instance to a dictionary."""
+        return {
+            "band": self.band,
+            "bytesReceived": self.bytesReceived,
+            "bytesSent": self.bytesSent,
+            "noise": self.noise,
+            "load": self.load,
+            "freeTime": self.freeTime,
+            "rxTime": self.rxTime,
+            "vendorStats_glitch": self.vendorStats_glitch,
+            "obssTime": self.obssTime,
+            "txTime": self.txTime,
+            "intTime": self.intTime,
+            "noise_air": self.noise_air,
+            "packetsReceived": self.packetsReceived,
+            "packetsSent": self.packetsSent,
+            "errorsReceived": self.errorsReceived,
+            "errorsSent": self.errorsSent,
+            "timestamp": self.timestamp.isoformat(timespec='milliseconds') + 'Z',
+        }
 
 @dataclass
 class stationStatsSample:
-    timestamp: datetime
+    station: str
+    band: str
     txBytes: int
     rxBytes: int
     uplinkMCS: int
@@ -58,6 +82,27 @@ class stationStatsSample:
     signalNoiseRatio: int
     rxPacketCount: int # pps
     txPacketCount: int # pps
+    timestamp: datetime
+
+    def to_dict(self):
+        """Convert the dataclass instance to a dictionary."""
+        return {
+            "station": self.station,
+            "band": self.band,
+            "txBytes": self.txBytes,
+            "rxBytes": self.rxBytes,
+            "uplinkMCS": self.uplinkMCS,
+            "lastDataUplinkRate": self.lastDataUplinkRate,
+            "lastDataDownlinkRate": self.lastDataDownlinkRate,
+            "signalStrength": self.signalStrength,
+            "avgSignalStrengthByChain": self.avgSignalStrengthByChain,
+            "uplinkShortGuard": self.uplinkShortGuard,
+            "downlinkMCS": self.downlinkMCS,
+            "signalNoiseRatio": self.signalNoiseRatio,
+            "rxPacketCount": self.rxPacketCount,
+            "txPacketCount": self.txPacketCount,
+            "timestamp": self.timestamp.isoformat(timespec='milliseconds') + 'Z',
+        }
 
 @dataclass
 class boxCounters:
@@ -152,6 +197,42 @@ class BoxDataForInferenceInput:
     tx_err_ps: float
     tx_ber: float
 
+    def to_dict(self):
+        """Convert the dataclass instance to a dictionary."""
+        return {
+            "box_rx_Mbps" : self.rx_Mbps,
+            "box_rx_Mbps_lag1" : self.rx_Mbps_lag1,
+            "box_rx_Mbps_lag2" : self.rx_Mbps_lag2,
+            "box_rx_Mbps_lag3" : self.rx_Mbps_lag3,
+            "box_rx_Mbps_avg3" : self.rx_Mbps_avg3,
+            "box_rx_Mbps_avg5" : self.rx_Mbps_avg5,
+            "box_rx_Mbps_avg7" : self.rx_Mbps_avg7,
+            "box_tx_Mbps" : self.tx_Mbps,
+            "box_tx_Mbps_lag1" : self.tx_Mbps_lag1,
+            "box_tx_Mbps_lag2" : self.tx_Mbps_lag2,
+            "box_tx_Mbps_lag3" : self.tx_Mbps_lag3,
+            "box_tx_Mbps_avg3" : self.tx_Mbps_avg3,
+            "box_tx_Mbps_avg5" : self.tx_Mbps_avg5,
+            "box_tx_Mbps_avg7" : self.tx_Mbps_avg7,
+            "box_noise" : self.noise,
+            "box_noise_lag3" : self.noise_lag3,
+            "box_noise_avg3" : self.noise_avg3,
+            "box_noise_avg5" : self.noise_avg5,
+            "box_noise_avg7" : self.noise_avg7,
+            "box_rx_pps" : self.rx_pps,
+            "box_tx_pps" : self.tx_pps,
+            "box_load" : self.load,
+            "box_freeTime" : self.freeTime,
+            "box_rxTime" : self.rxTime,
+            "box_vendorStats_glitch" : self.vendorStats_glitch,
+            "box_obssTime" : self.obssTime,
+            "box_txTime" : self.txTime,
+            "box_intTime" : self.intTime,
+            "box_noise_air" : self.noise_air,
+            "box_tx_err_ps" : self.tx_err_ps,
+            "box_tx_ber" : self.tx_ber,
+        }
+
 
 @dataclass
 class StationDataForInferenceInput:
@@ -230,4 +311,18 @@ class StationDataForInferenceInput:
             "downlinkMCS" : self.downlinkMCS,
             "avgSignalStrengthByChain" : self.avgSignalStrengthByChain,
             "signalNoiseRatio" : self.signalNoiseRatio,
+        }
+
+
+@dataclass
+class InferencesInput:
+    """Model for inference input data"""
+    box_data: BoxDataForInferenceInput
+    stations_data: Iterable[StationDataForInferenceInput]
+
+    def to_dict(self):
+        """Convert the dataclass instance to a dictionary."""
+        return {
+            "box_data" : self.box_data.to_dict(),
+            "stations_data" : [station_data.to_dict() for station_data in self.stations_data]
         }

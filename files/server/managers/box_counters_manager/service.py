@@ -7,6 +7,7 @@ import time
 from datetime import datetime
 from flask import Flask
 from server.interfaces.amx_usp_interface import AmxUspInterface
+from server.notification import notification_service
 from server.common import ServerBoxException, ErrorCode
 from server.common.model import stationStatsSample, boxStatsSample, samples_queue
 
@@ -131,12 +132,13 @@ class CountersManager(threading.Thread):
         box_radio_air_stats_5GHz  = box_radio_air_stats["5GHz"]
         timestamp = datetime.now()
 
+
         # Create boxStatsSample 2GHz object
         box_stats_sample_2GHz = boxStatsSample(
-            timestamp=timestamp,
+            band="2.4GHz",
             bytesReceived=box_radio_stats_2GHz["BytesReceived"],
             bytesSent=box_radio_stats_2GHz["BytesSent"],
-            noise=box_radio_stats_2GHz["Noise"],
+            noise=-abs(box_radio_stats_2GHz["Noise"]),
             load=box_radio_air_stats_2GHz["Load"],
             freeTime=box_radio_air_stats_2GHz["FreeTime"],
             rxTime=box_radio_air_stats_2GHz["RxTime"],
@@ -144,13 +146,17 @@ class CountersManager(threading.Thread):
             obssTime=box_radio_air_stats_2GHz["ObssTime"],
             txTime=box_radio_air_stats_2GHz["TxTime"],
             intTime=box_radio_air_stats_2GHz["IntTime"],
-            noise_air=box_radio_air_stats_2GHz["Noise"],
+            noise_air=-abs(box_radio_air_stats_2GHz["Noise"]),
             packetsReceived=box_radio_stats_2GHz["PacketsReceived"],
             packetsSent=box_radio_stats_2GHz["PacketsSent"],
             errorsReceived=box_radio_stats_2GHz["ErrorsReceived"],
             errorsSent=box_radio_stats_2GHz["ErrorsSent"],
+            timestamp=timestamp,
         )
         logger.debug(f"\nbox_stats_sample_2GHz:{box_stats_sample_2GHz}\n")
+
+        # Notify box counter to web server
+        notification_service.notify_box_counters(box_counters=box_stats_sample_2GHz)
 
         # Create boxStatsSample 5GHz object
         # If 5GHz band is off
@@ -159,10 +165,10 @@ class CountersManager(threading.Thread):
 
         else:
             box_stats_sample_5GHz = boxStatsSample(
-                timestamp=timestamp,
+                band="5GHz",
                 bytesReceived=box_radio_stats_5GHz["BytesReceived"],
                 bytesSent=box_radio_stats_5GHz["BytesSent"],
-                noise=box_radio_stats_5GHz["Noise"],
+                noise=-abs(box_radio_stats_5GHz["Noise"]),
                 load=box_radio_air_stats_5GHz["Load"],
                 freeTime=box_radio_air_stats_5GHz["FreeTime"],
                 rxTime=box_radio_air_stats_5GHz["RxTime"],
@@ -170,12 +176,15 @@ class CountersManager(threading.Thread):
                 obssTime=box_radio_air_stats_5GHz["ObssTime"],
                 txTime=box_radio_air_stats_5GHz["TxTime"],
                 intTime=box_radio_air_stats_5GHz["IntTime"],
-                noise_air=box_radio_air_stats_5GHz["Noise"],
+                noise_air=-abs(box_radio_air_stats_5GHz["Noise"]),
                 packetsReceived=box_radio_stats_5GHz["PacketsReceived"],
                 packetsSent=box_radio_stats_5GHz["PacketsSent"],
                 errorsReceived=box_radio_stats_5GHz["ErrorsReceived"],
                 errorsSent=box_radio_stats_5GHz["ErrorsSent"],
+                timestamp=timestamp,
             )
+            # Notify box counter to web server
+            notification_service.notify_box_counters(box_counters=box_stats_sample_5GHz)
 
         logger.debug(f"\nbox_stats_sample_5GHz:{box_stats_sample_5GHz}\n")
 
@@ -230,6 +239,7 @@ class CountersManager(threading.Thread):
         stations_stats = self.get_connected_stations_stats()
         timestamp = datetime.now()
         stations_counters = {}
+        counters_to_notify = []
 
         # Healt check
         if stations_stats is None:
@@ -239,8 +249,9 @@ class CountersManager(threading.Thread):
         # loop over connected stations
         for station in stations_stats:
             # Create and append stationStatsSample object
-            stations_counters[station] = stationStatsSample(
-                timestamp=timestamp,
+            counter = stationStatsSample(
+                station=station,
+                band=stations_stats[station]["band"],
                 txBytes=stations_stats[station]["TxBytes"],
                 rxBytes=stations_stats[station]["RxBytes"],
                 uplinkMCS=stations_stats[station]["UplinkMCS"],
@@ -253,7 +264,13 @@ class CountersManager(threading.Thread):
                 signalNoiseRatio=stations_stats[station]["SignalNoiseRatio"],
                 rxPacketCount=stations_stats[station]["RxPacketCount"],
                 txPacketCount=stations_stats[station]["TxPacketCount"],
+                timestamp=timestamp,
             )
+            stations_counters[station] = counter
+            counters_to_notify.append(counter)
+
+        # Notify stations counters to web server
+        notification_service.notify_stations_counters(stations_counters=counters_to_notify)
 
         # Return stations counters sample list
         return stations_counters

@@ -6,7 +6,7 @@ import numpy as np
 from datetime import datetime, timedelta
 from flask import Flask
 from server.interfaces.mlp_interface import MlpModelInterface
-from server.common import boxCounters, StationCounters, BoxDataForInferenceInput, StationDataForInferenceInput, SingleStationInferenceResult
+from server.common import boxCounters, StationCounters, BoxDataForInferenceInput, StationDataForInferenceInput, SingleStationInferenceResult, InferencesInput
 
 logger = logging.getLogger(__name__)
 
@@ -30,19 +30,18 @@ class MlpInferenceManager():
 
     def perform_inferences(
             self,
-            box_data_for_inference : BoxDataForInferenceInput,
-            stations_data_for_inference : Iterable[StationDataForInferenceInput],
+            inference_input: InferencesInput,
         ) -> Tuple[bool, Iterable[SingleStationInferenceResult]]:
         """Perform inferences on counters data"""
 
         # If counters not filled yet
-        if box_data_for_inference is None:
+        if inference_input is None:
                 return True, []
 
         # Perform inferences
         inference_results = self.mlp_model_interface.perform_inference(
-            box_data=box_data_for_inference,
-            stations_data=stations_data_for_inference,
+            box_data=inference_input.box_data,
+            stations_data=inference_input.stations_data,
         )
         if not inference_results:
             logger.error("Error when performing inferences")

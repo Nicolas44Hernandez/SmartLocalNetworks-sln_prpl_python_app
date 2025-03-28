@@ -16,7 +16,7 @@
             "STATIONS_TRAFFIC": "/api-sln/traffic/stations",
             "BOX_COUNTERS": "/api-sln/counters/box",
             "STATIONS_COUNTERS": "/api-sln/counters/stations",
-            "INFERENCES_RESULTS": "/api-sln/inference_results/"
+            "INFERENCES_RESULTS": "/api-sln/inference/"
         }
     }
 }
