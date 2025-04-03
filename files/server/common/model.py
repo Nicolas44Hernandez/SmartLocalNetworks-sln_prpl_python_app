@@ -40,8 +40,8 @@ class boxStatsSample:
     noise_air: int   # Is the same as the one retreived in getRadioStats() ?
     packetsReceived: int # pps
     packetsSent: int  # pps
-    errorsReceived: int # tx_ber / tx_err_ps
-    errorsSent: int # tx_ber / tx_err_ps
+    errorsReceived: int # tx_ber / tx_err_pps
+    errorsSent: int # tx_ber / tx_err_pps
     timestamp: datetime
 
     def to_dict(self):
@@ -79,9 +79,11 @@ class stationStatsSample:
     avgSignalStrengthByChain: int
     uplinkShortGuard: int
     downlinkMCS: int
+    inactive: int
     signalNoiseRatio: int
     rxPacketCount: int # pps
     txPacketCount: int # pps
+    txErrors: int
     timestamp: datetime
 
     def to_dict(self):
@@ -98,9 +100,11 @@ class stationStatsSample:
             "avgSignalStrengthByChain": self.avgSignalStrengthByChain,
             "uplinkShortGuard": self.uplinkShortGuard,
             "downlinkMCS": self.downlinkMCS,
+            "inactive": self.inactive,
             "signalNoiseRatio": self.signalNoiseRatio,
             "rxPacketCount": self.rxPacketCount,
             "txPacketCount": self.txPacketCount,
+            "txErrors": self.txErrors,
             "timestamp": self.timestamp.isoformat(timespec='milliseconds') + 'Z',
         }
 
@@ -127,7 +131,7 @@ class boxCounters:
     noise_air: int
     last_errorsReceived: int
     last_errorsSent: int
-    tx_err_ps: float
+    tx_err_pps: float
     tx_ber: float
 
 @dataclass
@@ -149,15 +153,19 @@ class StationCounters:
     signalStrength: Iterable[int]
     uplinkShortGuard: int
     downlinkMCS: int
+    inactive: int
     avgSignalStrengthByChain: int
     signalNoiseRatio: int
+    last_txErrors: int
+    tx_err_pps: float
+    tx_ber: float
     band: str
     inferences_results: Iterable[SingleStationInferenceResult]
 
     def inference_result_to_str(self) -> str:
         """used to print inference results"""
         return ' '.join(
-            f"({'ON' if inference_result.status else 'OFF'} p:{inference_result.probability:.2f}) "
+            f"({'ON' if inference_result.status else 'OFF'} p:{inference_result.probability:.6f}) "
             for inference_result in self.inferences_results
         )
 
@@ -165,13 +173,9 @@ class StationCounters:
 @dataclass
 class BoxDataForInferenceInput:
     """Model for box data inference input"""
-    rx_Mbps: float
-    rx_Mbps_lag1: float
-    rx_Mbps_lag2: float
-    rx_Mbps_lag3: float
-    rx_Mbps_avg3: float
-    rx_Mbps_avg5: float
-    rx_Mbps_avg7:float
+    obssTime: int
+    rxTime: int
+    txTime: int
     tx_Mbps: float
     tx_Mbps_lag1: float
     tx_Mbps_lag2: float
@@ -179,34 +183,24 @@ class BoxDataForInferenceInput:
     tx_Mbps_avg3: float
     tx_Mbps_avg5: float
     tx_Mbps_avg7: float
-    noise: int
-    noise_lag3: int
-    noise_avg3: float
-    noise_avg5: float
-    noise_avg7: float
+    rx_Mbps: float
+    rx_Mbps_lag1: float
+    rx_Mbps_lag2: float
+    rx_Mbps_lag3: float
+    rx_Mbps_avg3: float
+    rx_Mbps_avg5: float
+    rx_Mbps_avg7:float
+    tx_err_pps: float
+    tx_ber: float
     rx_pps: float
     tx_pps: float
-    load: int
-    freeTime: int
-    rxTime: int
-    vendorStats_glitch: int
-    obssTime: int
-    txTime: int
-    intTime: int
-    noise_air: int
-    tx_err_ps: float
-    tx_ber: float
 
     def to_dict(self):
         """Convert the dataclass instance to a dictionary."""
         return {
-            "box_rx_Mbps" : self.rx_Mbps,
-            "box_rx_Mbps_lag1" : self.rx_Mbps_lag1,
-            "box_rx_Mbps_lag2" : self.rx_Mbps_lag2,
-            "box_rx_Mbps_lag3" : self.rx_Mbps_lag3,
-            "box_rx_Mbps_avg3" : self.rx_Mbps_avg3,
-            "box_rx_Mbps_avg5" : self.rx_Mbps_avg5,
-            "box_rx_Mbps_avg7" : self.rx_Mbps_avg7,
+            "box_obssTime" : self.obssTime,
+            "box_rxTime" : self.rxTime,
+            "box_txTime" : self.txTime,
             "box_tx_Mbps" : self.tx_Mbps,
             "box_tx_Mbps_lag1" : self.tx_Mbps_lag1,
             "box_tx_Mbps_lag2" : self.tx_Mbps_lag2,
@@ -214,23 +208,17 @@ class BoxDataForInferenceInput:
             "box_tx_Mbps_avg3" : self.tx_Mbps_avg3,
             "box_tx_Mbps_avg5" : self.tx_Mbps_avg5,
             "box_tx_Mbps_avg7" : self.tx_Mbps_avg7,
-            "box_noise" : self.noise,
-            "box_noise_lag3" : self.noise_lag3,
-            "box_noise_avg3" : self.noise_avg3,
-            "box_noise_avg5" : self.noise_avg5,
-            "box_noise_avg7" : self.noise_avg7,
+            "box_rx_Mbps" : self.rx_Mbps,
+            "box_rx_Mbps_lag1" : self.rx_Mbps_lag1,
+            "box_rx_Mbps_lag2" : self.rx_Mbps_lag2,
+            "box_rx_Mbps_lag3" : self.rx_Mbps_lag3,
+            "box_rx_Mbps_avg3" : self.rx_Mbps_avg3,
+            "box_rx_Mbps_avg5" : self.rx_Mbps_avg5,
+            "box_rx_Mbps_avg7" : self.rx_Mbps_avg7,
+            "box_tx_err_pps" : self.tx_err_pps,
+            "box_tx_ber" : self.tx_ber,
             "box_rx_pps" : self.rx_pps,
             "box_tx_pps" : self.tx_pps,
-            "box_load" : self.load,
-            "box_freeTime" : self.freeTime,
-            "box_rxTime" : self.rxTime,
-            "box_vendorStats_glitch" : self.vendorStats_glitch,
-            "box_obssTime" : self.obssTime,
-            "box_txTime" : self.txTime,
-            "box_intTime" : self.intTime,
-            "box_noise_air" : self.noise_air,
-            "box_tx_err_ps" : self.tx_err_ps,
-            "box_tx_ber" : self.tx_ber,
         }
 
 
@@ -238,20 +226,6 @@ class BoxDataForInferenceInput:
 class StationDataForInferenceInput:
     """Model for station data inference input"""
     station: str
-    rx_Mbps: float
-    rx_Mbps_lag1: float
-    rx_Mbps_lag2: float
-    rx_Mbps_lag3: float
-    rx_Mbps_lag5: float
-    rx_Mbps_lag7: float
-    rx_Mbps_avg3: float
-    rx_Mbps_avg5: float
-    rx_Mbps_avg7: float
-    rx_Mbps_avg10: float
-    tx_Mbps: float
-    tx_Mbps_lag1: float
-    tx_Mbps_avg3: float
-    tx_Mbps_avg5: float
     signalStrength: int
     signalStrength_lag1: int
     signalStrength_lag2: int
@@ -262,36 +236,39 @@ class StationDataForInferenceInput:
     signalStrength_avg5: float
     signalStrength_avg7: float
     signalStrength_avg10: float
+    tx_Mbps: float
+    tx_Mbps_lag1: float
+    tx_Mbps_lag2: float
+    tx_Mbps_lag3: float
+    tx_Mbps_lag5: float
+    tx_Mbps_lag7: float
+    tx_Mbps_avg3: float
+    tx_Mbps_avg5: float
+    tx_Mbps_avg7: float
+    tx_Mbps_avg10: float
+    rx_Mbps: float
+    rx_Mbps_lag1: float
+    rx_Mbps_lag2: float
+    rx_Mbps_lag3: float
+    rx_Mbps_lag5: float
+    rx_Mbps_lag7: float
+    rx_Mbps_avg3: float
+    rx_Mbps_avg5: float
+    rx_Mbps_avg7: float
+    rx_Mbps_avg10: float
+    downlinkMCS: float
+    inactive: float
+    uplinkMCS: float
+    uplinkShortGuard: float
     rx_pps: float
     tx_pps: float
-    uplinkMCS: float
-    lastDataUplinkRate: float
-    lastDataDownlinkRate: float
-    uplinkShortGuard: float
-    downlinkMCS: float
-    avgSignalStrengthByChain: float
-    signalNoiseRatio: float
-
+    tx_err_pps: float
+    tx_ber: float
 
     def to_dict(self):
         """Convert the dataclass instance to a dictionary."""
         return {
-
             "station" : self.station,
-            "rx_Mbps" : self.rx_Mbps,
-            "rx_Mbps_lag1" : self.rx_Mbps_lag1,
-            "rx_Mbps_lag2" : self.rx_Mbps_lag2,
-            "rx_Mbps_lag3" : self.rx_Mbps_lag3,
-            "rx_Mbps_lag5" : self.rx_Mbps_lag5,
-            "rx_Mbps_lag7" : self.rx_Mbps_lag7,
-            "rx_Mbps_avg3" : self.rx_Mbps_avg3,
-            "rx_Mbps_avg5" : self.rx_Mbps_avg5,
-            "rx_Mbps_avg7" : self.rx_Mbps_avg7,
-            "rx_Mbps_avg10" : self.rx_Mbps_avg10,
-            "tx_Mbps" : self.tx_Mbps,
-            "tx_Mbps_lag1" : self.tx_Mbps_lag1,
-            "tx_Mbps_avg3" : self.tx_Mbps_avg3,
-            "tx_Mbps_avg5" : self.tx_Mbps_avg5,
             "signalStrength" : self.signalStrength,
             "signalStrength_lag1" : self.signalStrength_lag1,
             "signalStrength_lag2" : self.signalStrength_lag2,
@@ -302,15 +279,34 @@ class StationDataForInferenceInput:
             "signalStrength_avg5" : self.signalStrength_avg5,
             "signalStrength_avg7" : self.signalStrength_avg7,
             "signalStrength_avg10" : self.signalStrength_avg10,
+            "tx_Mbps" : self.tx_Mbps,
+            "tx_Mbps_lag1" : self.tx_Mbps_lag1,
+            "tx_Mbps_lag2" : self.tx_Mbps_lag2,
+            "tx_Mbps_lag3" : self.tx_Mbps_lag3,
+            "tx_Mbps_lag5" : self.tx_Mbps_lag5,
+            "tx_Mbps_lag7" : self.tx_Mbps_lag7,
+            "tx_Mbps_avg3" : self.tx_Mbps_avg3,
+            "tx_Mbps_avg5" : self.tx_Mbps_avg5,
+            "tx_Mbps_avg7" : self.tx_Mbps_avg7,
+            "tx_Mbps_avg10" : self.tx_Mbps_avg10,
+            "rx_Mbps" : self.rx_Mbps,
+            "rx_Mbps_lag1" : self.rx_Mbps_lag1,
+            "rx_Mbps_lag2" : self.rx_Mbps_lag2,
+            "rx_Mbps_lag3" : self.rx_Mbps_lag3,
+            "rx_Mbps_lag5" : self.rx_Mbps_lag5,
+            "rx_Mbps_lag7" : self.rx_Mbps_lag7,
+            "rx_Mbps_avg3" : self.rx_Mbps_avg3,
+            "rx_Mbps_avg5" : self.rx_Mbps_avg5,
+            "rx_Mbps_avg7" : self.rx_Mbps_avg7,
+            "rx_Mbps_avg10" : self.rx_Mbps_avg10,
+            "downlinkMCS" : self.downlinkMCS,
+            "inactive" : self.inactive,
+            "uplinkMCS" : self.uplinkMCS,
+            "uplinkShortGuard" : self.uplinkShortGuard,
             "rx_pps" : self.rx_pps,
             "tx_pps" : self.tx_pps,
-            "uplinkMCS" : self.uplinkMCS,
-            "lastDataUplinkRate" : self.lastDataUplinkRate,
-            "lastDataDownlinkRate" : self.lastDataDownlinkRate,
-            "uplinkShortGuard" : self.uplinkShortGuard,
-            "downlinkMCS" : self.downlinkMCS,
-            "avgSignalStrengthByChain" : self.avgSignalStrengthByChain,
-            "signalNoiseRatio" : self.signalNoiseRatio,
+            "tx_err_pps" : self.tx_err_pps,
+            "tx_ber" : self.tx_ber,
         }
 
 

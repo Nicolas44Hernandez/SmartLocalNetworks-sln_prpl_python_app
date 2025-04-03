@@ -41,7 +41,7 @@ class Counters():
                 noise_air = None,
                 last_errorsReceived = None,
                 last_errorsSent = None,
-                tx_err_ps = None,
+                tx_err_pps = None,
                 tx_ber = None,
             )
         self.counters_2GHz = boxCounters(
@@ -65,7 +65,7 @@ class Counters():
             noise_air = None,
             last_errorsReceived = None,
             last_errorsSent = None,
-            tx_err_ps = None,
+            tx_err_pps = None,
             tx_ber = None,
         )
         self.counters_stations = {}
@@ -103,7 +103,7 @@ class Counters():
                 reset_counter = True
 
         if reset_counter:
-            logger.debug(f"Reset counter")
+            logger.info(f"Reset counter")
             # Reset the counter
             counter_to_update = create_box_counter(sample)
         else:
@@ -148,8 +148,8 @@ class Counters():
                 power_level=32,
             )
 
-            # Get tx_err_ps
-            new_tx_err_ps = convert_incremental_values_in_instantaneous_values(
+            # Get tx_err_pps
+            new_tx_err_pps = convert_incremental_values_in_instantaneous_values(
                 timestamp_1=counter_to_update.last_sample_timestamp,
                 timestamp_2=sample.timestamp,
                 value_1=counter_to_update.last_errorsSent,
@@ -159,7 +159,7 @@ class Counters():
 
             # Get tx_ber
             if new_tx_Mbps != 0:
-                new_tx_ber = new_tx_err_ps / (new_tx_Mbps * 1E6)
+                new_tx_ber = new_tx_err_pps / (new_tx_Mbps * 1E6)
             else:
                 new_tx_ber = 0
 
@@ -193,7 +193,7 @@ class Counters():
             counter_to_update.noise_air=sample.noise_air
             counter_to_update.last_errorsReceived=sample.errorsReceived
             counter_to_update.last_errorsSent=sample.errorsSent
-            counter_to_update.tx_err_ps=new_tx_err_ps
+            counter_to_update.tx_err_pps=new_tx_err_pps
             counter_to_update.tx_ber=new_tx_ber
 
         # Reasign counters to instance
@@ -234,6 +234,7 @@ class Counters():
                     power_level=32,
                 )
                 new_tx_Mbps = convert_bytes_per_sec_into_Mbps(value_in_Bps=_tx_Bps)
+                # TODO: Check if is necessary and what to do withcalculated counters
                 if new_tx_Mbps > MAX_THROUGHPUT_COUNTER_VALUE:
                     new_tx_Mbps = MAX_THROUGHPUT_COUNTER_VALUE
 
@@ -246,6 +247,7 @@ class Counters():
                     power_level=32,
                 )
                 new_rx_Mbps = convert_bytes_per_sec_into_Mbps(value_in_Bps=_rx_Bps)
+                # TODO: Check if is necessary and what to do withcalculated counters
                 if new_rx_Mbps > MAX_THROUGHPUT_COUNTER_VALUE:
                     new_rx_Mbps = MAX_THROUGHPUT_COUNTER_VALUE
 
@@ -266,6 +268,21 @@ class Counters():
                     value_2=sample[station].txPacketCount,
                     power_level=32,
                 )
+
+                # Get tx_err_pps
+                new_tx_err_pps = convert_incremental_values_in_instantaneous_values(
+                    timestamp_1=counter_to_update.last_sample_timestamp,
+                    timestamp_2=sample[station].timestamp,
+                    value_1=counter_to_update.last_txErrors,
+                    value_2=sample[station].txErrors,
+                    power_level=32,
+                )
+
+                # Get tx_ber
+                if new_tx_Mbps != 0:
+                    new_tx_ber = new_tx_err_pps / (new_tx_Mbps * 1E6)
+                else:
+                    new_tx_ber = 0
 
                 # Update counters arrays values
                 if len(counter_to_update.rx_Mbps) < COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE:
@@ -292,8 +309,12 @@ class Counters():
                 counter_to_update.lastDataDownlinkRate = sample[station].lastDataDownlinkRate
                 counter_to_update.uplinkShortGuard = sample[station].uplinkShortGuard
                 counter_to_update.downlinkMCS = sample[station].downlinkMCS
+                counter_to_update.inactive = sample[station].inactive
                 counter_to_update.avgSignalStrengthByChain = sample[station].avgSignalStrengthByChain
                 counter_to_update.signalNoiseRatio = sample[station].signalNoiseRatio
+                counter_to_update.tx_err_pps = new_tx_err_pps
+                counter_to_update.last_txErrors = sample[station].txErrors
+                counter_to_update.tx_ber = new_tx_ber
 
                 # Append counter to updated counters dict
                 updated_counters[station] = counter_to_update
@@ -341,7 +362,7 @@ class Counters():
         """Print counters for debug"""
         # BOX COUNTERS
         if print_box_counters:
-            logger.debug(
+            logger.info(
                 f"\nBOX COUNTERS 2.4GHz - "
                 f"tx_Mbps:{self.counters_2GHz.tx_Mbps}  rx_Mbps:{self.counters_2GHz.rx_Mbps}  "
                 f"noise:{self.counters_2GHz.noise}  "
@@ -352,13 +373,13 @@ class Counters():
                 f"obssTime:{self.counters_2GHz.obssTime}  "
                 f"intTime:{self.counters_2GHz.intTime}  "
                 f"vendorStats_glitch:{self.counters_2GHz.vendorStats_glitch}  "
-                f"tx_err_ps:{self.counters_2GHz.tx_err_ps}  "
+                f"tx_err_pps:{self.counters_2GHz.tx_err_pps}  "
                 f"tx_ber:{self.counters_2GHz.tx_ber}\n"
             )
             if self.counters_5GHz is None:
-                logger.debug(f"BOX COUNTERS 5GHz - : None, band is OFF")
+                logger.info(f"BOX COUNTERS 5GHz - : None, band is OFF")
             else:
-                logger.debug(
+                logger.info(
                     f"\nBOX COUNTERS 5GHz - "
                     f"tx_Mbps:{self.counters_5GHz.tx_Mbps}  rx_Mbps:{self.counters_5GHz.rx_Mbps}"
                     f"noise:{self.counters_5GHz.noise}  "
@@ -369,14 +390,14 @@ class Counters():
                     f"obssTime:{self.counters_5GHz.obssTime}  "
                     f"intTime:{self.counters_5GHz.intTime}  "
                     f"vendorStats_glitch:{self.counters_5GHz.vendorStats_glitch}  "
-                    f"tx_err_ps:{self.counters_5GHz.tx_err_ps}  "
+                    f"tx_err_pps:{self.counters_5GHz.tx_err_pps}  "
                     f"tx_ber:{self.counters_5GHz.tx_ber}\n"
                 )
         if print_stations_counters:
             # STATIONS COUNTERS
             if len(self.counters_stations) > 0:
-                logger.debug("\nSTATIONS COUNTERS:")
-                logger.debug(
+                logger.info("\nSTATIONS COUNTERS:")
+                logger.info(
                     ' '.join(
                         f"\n{station}: "
                         f"tx_Mbps:{self.counters_stations[station].tx_Mbps}  "
@@ -388,6 +409,7 @@ class Counters():
                         f"lastDataUplinkRate:{self.counters_stations[station].lastDataUplinkRate}  "
                         f"lastDataDownlinkRate:{self.counters_stations[station].lastDataDownlinkRate}  "
                         f"uplinkShortGuard:{self.counters_stations[station].uplinkShortGuard}  "
+                        f"inactive:{self.counters_stations[station].upliinactivenkShortGuard}  "
                         f"downlinkMCS:{self.counters_stations[station].downlinkMCS}  "
                         f"avgSignalStrengthByChain:{self.counters_stations[station].avgSignalStrengthByChain}  "
                         f"signalNoiseRatio:{self.counters_stations[station].signalNoiseRatio}  "
@@ -398,8 +420,8 @@ class Counters():
         if print_inferences_results:
             # STATIONS COUNTERS
             if len(self.counters_stations) > 0:
-                logger.debug("\nINFERENCES RESULTS:")
-                logger.debug(
+                logger.info("\nINFERENCES RESULTS:")
+                logger.info(
                     ' '.join(
                         f"\n{station}: "
                         f"inferences_results:[{self.counters_stations[station].inference_result_to_str()}]"
