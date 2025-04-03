@@ -13,6 +13,7 @@ from server.common.model import stationStatsSample, boxStatsSample, samples_queu
 
 if os.getenv("FLASK_ENV") == "DEVELOPMENT":
     from server.common.mock_dev import mock_stations, mock_radio_air_stats, mock_radio_stats, mock_radio_stats_2
+    samples_counter = 0
 
 logger = logging.getLogger(__name__)
 
@@ -203,6 +204,8 @@ class CountersManager(threading.Thread):
                 logger.error("Error when retreiving connected stations counters")
                 return None
         else:
+            global samples_counter
+
             stations = mock_stations
 
             # Increment for station 1
@@ -216,6 +219,16 @@ class CountersManager(threading.Thread):
             stations[list(stations.keys())[1]]["TxBytes"] += 625000
             stations[list(stations.keys())[1]]["RxPacketCount"] += 50
             stations[list(stations.keys())[1]]["TxPacketCount"] += 5
+
+            # Band switch simulation after 6 samples
+            if samples_counter > 6 :
+                old_key = list(stations.keys())[1]
+                old_band = old_key.split(".")[3]
+                new_band = "2" if old_band == "1" else "1"
+
+                new_key = old_key.replace(f"AccessPoint.{old_band}", f"AccessPoint.{new_band}")
+                stations[new_key] = stations.pop(old_key)
+            samples_counter += 1
 
 
         # Loop in stations to get active stations
