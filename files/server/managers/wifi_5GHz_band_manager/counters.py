@@ -206,6 +206,7 @@ class Counters():
     def update_stations_counters(self, sample: stationStatsSample) -> bool:
         """Update stations counters from sample"""
         updated_counters = {}
+        station_has_switched_band = False
         for station in sample:
             # Check if a counter already exists for station
             if station not in self.counters_stations:
@@ -224,104 +225,127 @@ class Counters():
                     updated_counters[station] = create_stations_counter(station, sample[station])
                     continue
 
+                # If station changed only update last_x counters
+                if counter_to_update.band is not None and sample[station].band != counter_to_update.band:
+                    # Updatflag
+                    station_has_switched_band = True
+
+                    # Update counters values
+                    counter_to_update.last_sample_timestamp = sample[station].timestamp
+                    counter_to_update.last_txBytes = sample[station].txBytes
+                    counter_to_update.last_rxBytes = sample[station].rxBytes
+                    counter_to_update.last_rxPacketCount = sample[station].rxPacketCount
+                    counter_to_update.last_txPacketCount = sample[station].txPacketCount
+                    counter_to_update.lastDataUplinkRate = sample[station].lastDataUplinkRate
+                    counter_to_update.lastDataDownlinkRate = sample[station].lastDataDownlinkRate
+                    counter_to_update.uplinkShortGuard = sample[station].uplinkShortGuard
+                    counter_to_update.downlinkMCS = sample[station].downlinkMCS
+                    counter_to_update.inactive = sample[station].inactive
+                    counter_to_update.avgSignalStrengthByChain = sample[station].avgSignalStrengthByChain
+                    counter_to_update.signalNoiseRatio = sample[station].signalNoiseRatio
+                    counter_to_update.last_txErrors = sample[station].txErrors
+                    counter_to_update.band = sample[station].band
+
                 # Update counter values
-                # Get tx_Mbps
-                _tx_Bps = convert_incremental_values_in_instantaneous_values(
-                    timestamp_1=counter_to_update.last_sample_timestamp,
-                    timestamp_2=sample[station].timestamp,
-                    value_1=counter_to_update.last_txBytes,
-                    value_2=sample[station].txBytes,
-                    power_level=32,
-                )
-                new_tx_Mbps = convert_bytes_per_sec_into_Mbps(value_in_Bps=_tx_Bps)
-                # TODO: Check if is necessary and what to do withcalculated counters
-                if new_tx_Mbps > MAX_THROUGHPUT_COUNTER_VALUE:
-                    new_tx_Mbps = MAX_THROUGHPUT_COUNTER_VALUE
-
-                # Get rx_Mbps
-                _rx_Bps = convert_incremental_values_in_instantaneous_values(
-                    timestamp_1=counter_to_update.last_sample_timestamp,
-                    timestamp_2=sample[station].timestamp,
-                    value_1=counter_to_update.last_rxBytes,
-                    value_2=sample[station].rxBytes,
-                    power_level=32,
-                )
-                new_rx_Mbps = convert_bytes_per_sec_into_Mbps(value_in_Bps=_rx_Bps)
-                # TODO: Check if is necessary and what to do withcalculated counters
-                if new_rx_Mbps > MAX_THROUGHPUT_COUNTER_VALUE:
-                    new_rx_Mbps = MAX_THROUGHPUT_COUNTER_VALUE
-
-                # Get rx_pps
-                new_rx_pps = convert_incremental_values_in_instantaneous_values(
-                    timestamp_1=counter_to_update.last_sample_timestamp,
-                    timestamp_2=sample[station].timestamp,
-                    value_1=counter_to_update.last_rxPacketCount,
-                    value_2=sample[station].rxPacketCount,
-                    power_level=32,
-                )
-
-                # Get tx_pps
-                new_tx_pps = convert_incremental_values_in_instantaneous_values(
-                    timestamp_1=counter_to_update.last_sample_timestamp,
-                    timestamp_2=sample[station].timestamp,
-                    value_1=counter_to_update.last_txPacketCount,
-                    value_2=sample[station].txPacketCount,
-                    power_level=32,
-                )
-
-                # Get tx_err_pps
-                new_tx_err_pps = convert_incremental_values_in_instantaneous_values(
-                    timestamp_1=counter_to_update.last_sample_timestamp,
-                    timestamp_2=sample[station].timestamp,
-                    value_1=counter_to_update.last_txErrors,
-                    value_2=sample[station].txErrors,
-                    power_level=32,
-                )
-
-                # Get tx_ber
-                if new_tx_Mbps != 0:
-                    new_tx_ber = new_tx_err_pps / (new_tx_Mbps * 1E6)
                 else:
-                    new_tx_ber = 0
+                    # Get tx_Mbps
+                    _tx_Bps = convert_incremental_values_in_instantaneous_values(
+                        timestamp_1=counter_to_update.last_sample_timestamp,
+                        timestamp_2=sample[station].timestamp,
+                        value_1=counter_to_update.last_txBytes,
+                        value_2=sample[station].txBytes,
+                        power_level=32,
+                    )
+                    new_tx_Mbps = convert_bytes_per_sec_into_Mbps(value_in_Bps=_tx_Bps)
+                    # TODO: Check if is necessary and what to do withcalculated counters
+                    if new_tx_Mbps > MAX_THROUGHPUT_COUNTER_VALUE:
+                        new_tx_Mbps = MAX_THROUGHPUT_COUNTER_VALUE
 
-                # Update counters arrays values
-                if len(counter_to_update.rx_Mbps) < COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE:
-                    # Arrays not completely filled
-                    counter_to_update.rx_Mbps.append(new_rx_Mbps)
-                    counter_to_update.tx_Mbps.append(new_tx_Mbps)
-                    counter_to_update.signalStrength.append(sample[station].signalStrength)
-                else:
-                    # arrays are already fully filled
-                    counter_to_update.rx_Mbps = counter_to_update.rx_Mbps[1:] + [new_rx_Mbps]
-                    counter_to_update.tx_Mbps = counter_to_update.tx_Mbps[1:] + [new_tx_Mbps]
-                    counter_to_update.signalStrength = counter_to_update.signalStrength[1:] + [sample[station].signalStrength]
+                    # Get rx_Mbps
+                    _rx_Bps = convert_incremental_values_in_instantaneous_values(
+                        timestamp_1=counter_to_update.last_sample_timestamp,
+                        timestamp_2=sample[station].timestamp,
+                        value_1=counter_to_update.last_rxBytes,
+                        value_2=sample[station].rxBytes,
+                        power_level=32,
+                    )
+                    new_rx_Mbps = convert_bytes_per_sec_into_Mbps(value_in_Bps=_rx_Bps)
+                    # TODO: Check if is necessary and what to do withcalculated counters
+                    if new_rx_Mbps > MAX_THROUGHPUT_COUNTER_VALUE:
+                        new_rx_Mbps = MAX_THROUGHPUT_COUNTER_VALUE
 
-                # Update counters values
-                counter_to_update.last_sample_timestamp = sample[station].timestamp
-                counter_to_update.last_txBytes = sample[station].txBytes
-                counter_to_update.last_rxBytes = sample[station].rxBytes
-                counter_to_update.rx_pps = new_rx_pps
-                counter_to_update.last_rxPacketCount = sample[station].rxPacketCount
-                counter_to_update.tx_pps = new_tx_pps
-                counter_to_update.last_txPacketCount = sample[station].txPacketCount
-                counter_to_update.uplinkMCS = sample[station].uplinkMCS
-                counter_to_update.lastDataUplinkRate = sample[station].lastDataUplinkRate
-                counter_to_update.lastDataDownlinkRate = sample[station].lastDataDownlinkRate
-                counter_to_update.uplinkShortGuard = sample[station].uplinkShortGuard
-                counter_to_update.downlinkMCS = sample[station].downlinkMCS
-                counter_to_update.inactive = sample[station].inactive
-                counter_to_update.avgSignalStrengthByChain = sample[station].avgSignalStrengthByChain
-                counter_to_update.signalNoiseRatio = sample[station].signalNoiseRatio
-                counter_to_update.tx_err_pps = new_tx_err_pps
-                counter_to_update.last_txErrors = sample[station].txErrors
-                counter_to_update.tx_ber = new_tx_ber
+                    # Get rx_pps
+                    new_rx_pps = convert_incremental_values_in_instantaneous_values(
+                        timestamp_1=counter_to_update.last_sample_timestamp,
+                        timestamp_2=sample[station].timestamp,
+                        value_1=counter_to_update.last_rxPacketCount,
+                        value_2=sample[station].rxPacketCount,
+                        power_level=32,
+                    )
+
+                    # Get tx_pps
+                    new_tx_pps = convert_incremental_values_in_instantaneous_values(
+                        timestamp_1=counter_to_update.last_sample_timestamp,
+                        timestamp_2=sample[station].timestamp,
+                        value_1=counter_to_update.last_txPacketCount,
+                        value_2=sample[station].txPacketCount,
+                        power_level=32,
+                    )
+
+                    # Get tx_err_pps
+                    new_tx_err_pps = convert_incremental_values_in_instantaneous_values(
+                        timestamp_1=counter_to_update.last_sample_timestamp,
+                        timestamp_2=sample[station].timestamp,
+                        value_1=counter_to_update.last_txErrors,
+                        value_2=sample[station].txErrors,
+                        power_level=32,
+                    )
+
+                    # Get tx_ber
+                    if new_tx_Mbps != 0:
+                        new_tx_ber = new_tx_err_pps / (new_tx_Mbps * 1E6)
+                    else:
+                        new_tx_ber = 0
+
+                    # Update counters arrays values
+                    if len(counter_to_update.rx_Mbps) < COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE:
+                        # Arrays not completely filled
+                        counter_to_update.rx_Mbps.append(new_rx_Mbps)
+                        counter_to_update.tx_Mbps.append(new_tx_Mbps)
+                        counter_to_update.signalStrength.append(sample[station].signalStrength)
+                    else:
+                        # arrays are already fully filled
+                        counter_to_update.rx_Mbps = counter_to_update.rx_Mbps[1:] + [new_rx_Mbps]
+                        counter_to_update.tx_Mbps = counter_to_update.tx_Mbps[1:] + [new_tx_Mbps]
+                        counter_to_update.signalStrength = counter_to_update.signalStrength[1:] + [sample[station].signalStrength]
+
+                    # Update counters values
+                    counter_to_update.last_sample_timestamp = sample[station].timestamp
+                    counter_to_update.last_txBytes = sample[station].txBytes
+                    counter_to_update.last_rxBytes = sample[station].rxBytes
+                    counter_to_update.rx_pps = new_rx_pps
+                    counter_to_update.last_rxPacketCount = sample[station].rxPacketCount
+                    counter_to_update.tx_pps = new_tx_pps
+                    counter_to_update.last_txPacketCount = sample[station].txPacketCount
+                    counter_to_update.uplinkMCS = sample[station].uplinkMCS
+                    counter_to_update.lastDataUplinkRate = sample[station].lastDataUplinkRate
+                    counter_to_update.lastDataDownlinkRate = sample[station].lastDataDownlinkRate
+                    counter_to_update.uplinkShortGuard = sample[station].uplinkShortGuard
+                    counter_to_update.downlinkMCS = sample[station].downlinkMCS
+                    counter_to_update.inactive = sample[station].inactive
+                    counter_to_update.avgSignalStrengthByChain = sample[station].avgSignalStrengthByChain
+                    counter_to_update.signalNoiseRatio = sample[station].signalNoiseRatio
+                    counter_to_update.tx_err_pps = new_tx_err_pps
+                    counter_to_update.last_txErrors = sample[station].txErrors
+                    counter_to_update.band = sample[station].band
+                    counter_to_update.tx_ber = new_tx_ber
 
                 # Append counter to updated counters dict
                 updated_counters[station] = counter_to_update
 
         # Reasign counters to instance
         self.counters_stations = updated_counters
-        return True
+        return not station_has_switched_band
 
     def purge_stations_counters(self) -> bool:
         """Purge the disconnected stations"""
@@ -351,7 +375,6 @@ class Counters():
                     self.counters_stations[result.station].inferences_results.append(result)
                 else:
                     self.counters_stations[result.station].inferences_results = self.counters_stations[result.station].inferences_results[1:] + [result]
-
 
     def print_counters(
             self,

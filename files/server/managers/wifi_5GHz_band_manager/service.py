@@ -71,8 +71,7 @@ class WifiBandsManager(threading.Thread, Counters):
                     continue
                 # Update stations counters
                 if not self.update_stations_counters(sample=sample_stations):
-                    logger.error("Error in stations counters update, counters are reset")
-                    self.init_counters()
+                    logger.error("At least one station switch band, inferences not performed")
                     continue
 
                 # Purge disconnected stations from counters
@@ -128,6 +127,9 @@ class WifiBandsManager(threading.Thread, Counters):
             logger.debug("Counters are not filled yet")
             return True, None
 
+        # TODO: review box counters logic
+        # Station is connected to which band?
+        # How to manage different cases
         # If 5GHz band is OFF, counter is None
         if self.counters_5GHz is None:
             # Use only 2.4GHz counter values
@@ -153,7 +155,7 @@ class WifiBandsManager(threading.Thread, Counters):
             rx_Mbps_array = [a + b for a, b in zip(self.counters_2GHz.rx_Mbps, self.counters_5GHz.rx_Mbps)]
             tx_err_pps = self.counters_2GHz.tx_err_pps + self.counters_5GHz.tx_err_pps
             tx_ber = self.counters_2GHz.tx_ber + self.counters_5GHz.tx_ber
-            rx_pps = self.counters_2GHz.rx_pps + self.counters_2GHz.tx_pps
+            rx_pps = self.counters_2GHz.rx_pps + self.counters_2GHz.rx_pps
             tx_pps = self.counters_2GHz.tx_pps + self.counters_2GHz.tx_pps
 
         # Create BoxDataForInferenceInput object
@@ -234,8 +236,8 @@ class WifiBandsManager(threading.Thread, Counters):
                         uplinkShortGuard = self.counters_stations[station].uplinkShortGuard,
                         rx_pps = self.counters_stations[station].rx_pps,
                         tx_pps = self.counters_stations[station].tx_pps,
-                        tx_err_pps = self.counters_stations[station].tx_err_pps, # OJO CON ESTE COUNTER
-                        tx_ber = self.counters_stations[station].tx_ber, # OJO CON ESTE COUNTER
+                        tx_err_pps = self.counters_stations[station].tx_err_pps,
+                        tx_ber = self.counters_stations[station].tx_ber,
                     )
                 )
             except:
