@@ -1,6 +1,8 @@
 # SmartLocalNetworks-sln_prpl_python_app
 Prpl python app
 
+# Moldel: MLP_12_03
+
 ## Build the image
 Clone recipe in prpl_sdk_lb6:
 ```bash
