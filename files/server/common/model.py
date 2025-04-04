@@ -177,21 +177,7 @@ class BoxDataForInferenceInput:
     rxTime: int
     txTime: int
     tx_Mbps: float
-    tx_Mbps_lag1: float
-    tx_Mbps_lag2: float
-    tx_Mbps_lag3: float
-    tx_Mbps_avg3: float
-    tx_Mbps_avg5: float
-    tx_Mbps_avg7: float
     rx_Mbps: float
-    rx_Mbps_lag1: float
-    rx_Mbps_lag2: float
-    rx_Mbps_lag3: float
-    rx_Mbps_avg3: float
-    rx_Mbps_avg5: float
-    rx_Mbps_avg7:float
-    tx_err_pps: float
-    tx_ber: float
     rx_pps: float
     tx_pps: float
 
@@ -202,21 +188,7 @@ class BoxDataForInferenceInput:
             "box_rxTime" : self.rxTime,
             "box_txTime" : self.txTime,
             "box_tx_Mbps" : self.tx_Mbps,
-            "box_tx_Mbps_lag1" : self.tx_Mbps_lag1,
-            "box_tx_Mbps_lag2" : self.tx_Mbps_lag2,
-            "box_tx_Mbps_lag3" : self.tx_Mbps_lag3,
-            "box_tx_Mbps_avg3" : self.tx_Mbps_avg3,
-            "box_tx_Mbps_avg5" : self.tx_Mbps_avg5,
-            "box_tx_Mbps_avg7" : self.tx_Mbps_avg7,
             "box_rx_Mbps" : self.rx_Mbps,
-            "box_rx_Mbps_lag1" : self.rx_Mbps_lag1,
-            "box_rx_Mbps_lag2" : self.rx_Mbps_lag2,
-            "box_rx_Mbps_lag3" : self.rx_Mbps_lag3,
-            "box_rx_Mbps_avg3" : self.rx_Mbps_avg3,
-            "box_rx_Mbps_avg5" : self.rx_Mbps_avg5,
-            "box_rx_Mbps_avg7" : self.rx_Mbps_avg7,
-            "box_tx_err_pps" : self.tx_err_pps,
-            "box_tx_ber" : self.tx_ber,
             "box_rx_pps" : self.rx_pps,
             "box_tx_pps" : self.tx_pps,
         }
@@ -227,86 +199,28 @@ class StationDataForInferenceInput:
     """Model for station data inference input"""
     station: str
     signalStrength: int
-    signalStrength_lag1: int
-    signalStrength_lag2: int
-    signalStrength_lag3: int
-    signalStrength_lag5: int
-    signalStrength_lag7: int
-    signalStrength_avg3: float
-    signalStrength_avg5: float
-    signalStrength_avg7: float
-    signalStrength_avg10: float
-    tx_Mbps: float
-    tx_Mbps_lag1: float
-    tx_Mbps_lag2: float
-    tx_Mbps_lag3: float
-    tx_Mbps_lag5: float
-    tx_Mbps_lag7: float
-    tx_Mbps_avg3: float
-    tx_Mbps_avg5: float
-    tx_Mbps_avg7: float
-    tx_Mbps_avg10: float
-    rx_Mbps: float
-    rx_Mbps_lag1: float
-    rx_Mbps_lag2: float
-    rx_Mbps_lag3: float
-    rx_Mbps_lag5: float
-    rx_Mbps_lag7: float
-    rx_Mbps_avg3: float
-    rx_Mbps_avg5: float
-    rx_Mbps_avg7: float
-    rx_Mbps_avg10: float
     downlinkMCS: float
-    inactive: float
     uplinkMCS: float
     uplinkShortGuard: float
+    tx_Mbps: float
+    rx_Mbps: float
     rx_pps: float
     tx_pps: float
     tx_err_pps: float
-    tx_ber: float
 
     def to_dict(self):
         """Convert the dataclass instance to a dictionary."""
         return {
             "station" : self.station,
             "signalStrength" : self.signalStrength,
-            "signalStrength_lag1" : self.signalStrength_lag1,
-            "signalStrength_lag2" : self.signalStrength_lag2,
-            "signalStrength_lag3" : self.signalStrength_lag3,
-            "signalStrength_lag5" : self.signalStrength_lag5,
-            "signalStrength_lag7" : self.signalStrength_lag7,
-            "signalStrength_avg3" : self.signalStrength_avg3,
-            "signalStrength_avg5" : self.signalStrength_avg5,
-            "signalStrength_avg7" : self.signalStrength_avg7,
-            "signalStrength_avg10" : self.signalStrength_avg10,
-            "tx_Mbps" : self.tx_Mbps,
-            "tx_Mbps_lag1" : self.tx_Mbps_lag1,
-            "tx_Mbps_lag2" : self.tx_Mbps_lag2,
-            "tx_Mbps_lag3" : self.tx_Mbps_lag3,
-            "tx_Mbps_lag5" : self.tx_Mbps_lag5,
-            "tx_Mbps_lag7" : self.tx_Mbps_lag7,
-            "tx_Mbps_avg3" : self.tx_Mbps_avg3,
-            "tx_Mbps_avg5" : self.tx_Mbps_avg5,
-            "tx_Mbps_avg7" : self.tx_Mbps_avg7,
-            "tx_Mbps_avg10" : self.tx_Mbps_avg10,
-            "rx_Mbps" : self.rx_Mbps,
-            "rx_Mbps_lag1" : self.rx_Mbps_lag1,
-            "rx_Mbps_lag2" : self.rx_Mbps_lag2,
-            "rx_Mbps_lag3" : self.rx_Mbps_lag3,
-            "rx_Mbps_lag5" : self.rx_Mbps_lag5,
-            "rx_Mbps_lag7" : self.rx_Mbps_lag7,
-            "rx_Mbps_avg3" : self.rx_Mbps_avg3,
-            "rx_Mbps_avg5" : self.rx_Mbps_avg5,
-            "rx_Mbps_avg7" : self.rx_Mbps_avg7,
-            "rx_Mbps_avg10" : self.rx_Mbps_avg10,
             "downlinkMCS" : self.downlinkMCS,
-            "inactive" : self.inactive,
             "uplinkMCS" : self.uplinkMCS,
             "uplinkShortGuard" : self.uplinkShortGuard,
+            "tx_Mbps" : self.tx_Mbps,
+            "rx_Mbps" : self.rx_Mbps,
             "rx_pps" : self.rx_pps,
             "tx_pps" : self.tx_pps,
             "tx_err_pps" : self.tx_err_pps,
-            "tx_ber" : self.tx_ber,
         }
 
 

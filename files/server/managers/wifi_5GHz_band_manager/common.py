@@ -5,7 +5,7 @@ from server.common import boxCounters, boxStatsSample, stationStatsSample, Stati
 
 BANDS = ["2.4GHz", "5GHz", "6GHz"]
 MAX_THROUGHPUT_COUNTER_VALUE = 40
-COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE = 10
+COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE = 6
 
 def create_box_counter(sample: boxStatsSample):
     """Create a new box counter"""
