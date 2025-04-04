@@ -99,63 +99,20 @@ obssTime_box = sample_single[0]
 rxTime_box = sample_single[1]
 txTime_box = sample_single[2]
 tx_Mbps_box = sample_single[3]
-tx_Mbps_lag_1_box = sample_single[9]
-tx_Mbps_lag_2_box = sample_single[11]
-tx_Mbps_lag_3_box = sample_single[13]
-tx_Mbps_avg_3_box = sample_single[15]
-tx_Mbps_avg_5_box = sample_single[17]
-tx_Mbps_avg_7_box = sample_single[19]
 rx_Mbps_box = sample_single[4]
-rx_Mbps_lag_1_box = sample_single[10]
-rx_Mbps_lag_2_box = sample_single[12]
-rx_Mbps_lag_3_box = sample_single[14]
-rx_Mbps_avg_3_box = sample_single[16]
-rx_Mbps_avg_5_box = sample_single[18]
-rx_Mbps_avg_7_box = sample_single[20]
-tx_err_pps_box = sample_single[5]
-tx_ber_box = sample_single[6]
-rx_pps_box = sample_single[7]
-tx_pps_box = sample_single[8]
+rx_pps_box = sample_single[5]
+tx_pps_box = sample_single[6]
 
 # STATION
-signalStrength = sample_single[21]
-signalStrength_lag1 = sample_single[34]
-signalStrength_lag2 = sample_single[37]
-signalStrength_lag3 = sample_single[40]
-signalStrength_lag5 = sample_single[43]
-signalStrength_lag7 = sample_single[46]
-signalStrength_avg3 = sample_single[49]
-signalStrength_avg5 = sample_single[52]
-signalStrength_avg7 = sample_single[55]
-signalStrength_avg10 = sample_single[58]
-tx_Mbps = sample_single[26]
-tx_Mbps_lag1 = sample_single[32]
-tx_Mbps_lag2 = sample_single[35]
-tx_Mbps_lag3 = sample_single[38]
-tx_Mbps_lag5 = sample_single[41]
-tx_Mbps_lag7 = sample_single[44]
-tx_Mbps_avg3 = sample_single[47]
-tx_Mbps_avg5 = sample_single[50]
-tx_Mbps_avg7 = sample_single[53]
-tx_Mbps_avg10 = sample_single[56]
-rx_Mbps = sample_single[27]
-rx_Mbps_lag1 = sample_single[33]
-rx_Mbps_lag2 = sample_single[36]
-rx_Mbps_lag3 = sample_single[39]
-rx_Mbps_lag5 = sample_single[42]
-rx_Mbps_lag7 = sample_single[45]
-rx_Mbps_avg3 = sample_single[48]
-rx_Mbps_avg5 = sample_single[51]
-rx_Mbps_avg7 = sample_single[54]
-rx_Mbps_avg10 = sample_single[57]
-downlinkMCS = sample_single[22]
-inactive = sample_single[23]
-uplinkMCS = sample_single[24]
-uplinkShortGuard = sample_single[25]
-rx_pps = sample_single[28]
-tx_pps = sample_single[29]
-tx_err_pps = sample_single[30]
-tx_ber = sample_single[31]
+signalStrength = sample_single[7]
+downlinkMCS = sample_single[8]
+uplinkMCS = sample_single[9]
+uplinkShortGuard = sample_single[10]
+tx_Mbps = sample_single[11]
+rx_Mbps = sample_single[12]
+rx_pps = sample_single[13]
+tx_pps = sample_single[14]
+tx_err_pps = sample_single[15]
 
 
 # Create dataframe
@@ -165,25 +122,10 @@ data = [
     txTime_box,
     tx_Mbps_box,
     rx_Mbps_box,
-    tx_err_pps_box,
-    tx_ber_box,
     rx_pps_box,
     tx_pps_box,
-    tx_Mbps_lag_1_box,
-    rx_Mbps_lag_1_box,
-    tx_Mbps_lag_2_box,
-    rx_Mbps_lag_2_box,
-    tx_Mbps_lag_3_box,
-    rx_Mbps_lag_3_box,
-    tx_Mbps_avg_3_box,
-    rx_Mbps_avg_3_box,
-    tx_Mbps_avg_5_box,
-    rx_Mbps_avg_5_box,
-    tx_Mbps_avg_7_box,
-    rx_Mbps_avg_7_box,
     signalStrength,
     downlinkMCS,
-    inactive,
     uplinkMCS,
     uplinkShortGuard,
     tx_Mbps,
@@ -191,34 +133,6 @@ data = [
     rx_pps,
     tx_pps,
     tx_err_pps,
-    tx_ber,
-    tx_Mbps_lag1,
-    rx_Mbps_lag1,
-    signalStrength_lag1,
-    tx_Mbps_lag2,
-    rx_Mbps_lag2,
-    signalStrength_lag2,
-    tx_Mbps_lag3,
-    rx_Mbps_lag3,
-    signalStrength_lag3,
-    tx_Mbps_lag5,
-    rx_Mbps_lag5,
-    signalStrength_lag5,
-    tx_Mbps_lag7,
-    rx_Mbps_lag7,
-    signalStrength_lag7,
-    tx_Mbps_avg3,
-    rx_Mbps_avg3,
-    signalStrength_avg3,
-    tx_Mbps_avg5,
-    rx_Mbps_avg5,
-    signalStrength_avg5,
-    tx_Mbps_avg7,
-    rx_Mbps_avg7,
-    signalStrength_avg7,
-    tx_Mbps_avg10,
-    rx_Mbps_avg10,
-    signalStrength_avg10,
 ]
 
 # Check if arrays are similar

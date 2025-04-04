@@ -18,7 +18,7 @@
             "program": "${workspaceFolder}/files/test_models/test_model.py",
             "console": "integratedTerminal",
             "args": [
-                "MLP_12_3",
+                "MLP_XP4_16_16_16",
                 "files/models",
             ]
         },
