@@ -85,8 +85,8 @@ do_install () {
 
         # MODELS
         install -d ${D}/usr/models
-        install -d ${D}/usr/models/MLP_12_3
-        install -m 0644 ${S}/models/MLP_12_3/* ${D}/usr/models/MLP_12_3/
+        install -d ${D}/usr/models/MLP_XP4_16_16_16
+        install -m 0644 ${S}/models/MLP_XP4_16_16_16/* ${D}/usr/models/MLP_XP4_16_16_16/
 
         # TEST MODELS
         install -d ${D}/usr/test_models

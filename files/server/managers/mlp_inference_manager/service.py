@@ -6,7 +6,7 @@ import numpy as np
 from datetime import datetime, timedelta
 from flask import Flask
 from server.interfaces.mlp_interface import MlpModelInterface
-from server.common import boxCounters, StationCounters, BoxDataForInferenceInput, StationDataForInferenceInput, SingleStationInferenceResult, InferencesInput
+from server.common import boxCounters, StationCounters, SingleStationInferenceResult, InferencesInput
 
 logger = logging.getLogger(__name__)
 

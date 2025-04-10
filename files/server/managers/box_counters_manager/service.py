@@ -220,8 +220,8 @@ class CountersManager(threading.Thread):
             stations[list(stations.keys())[1]]["RxPacketCount"] += 50
             stations[list(stations.keys())[1]]["TxPacketCount"] += 5
 
-            # Band switch simulation after 6 samples
-            if samples_counter > 6 :
+            # Band switch simulation after 50 samples
+            if samples_counter > 50 :
                 old_key = list(stations.keys())[1]
                 old_band = old_key.split(".")[3]
                 new_band = "2" if old_band == "1" else "1"

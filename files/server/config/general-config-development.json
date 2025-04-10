@@ -5,7 +5,7 @@
         "POLLING_PERIOD_IN_SECS": 2,
         "PURGE_TIMER_IN_SECS": 20
     },
-    "MODEL": "files/models/MLP_12_3/MLP_12_3_OPTIM.pkl",
+    "MODEL": "files/models/MLP_XP4_16_16_16/MLP_XP4_16_16_16_OPTIM.pkl",
     "PREDICTIONS_THRESHOLD": 0.5,
     "WEB_SERVER": {
         "IP_ADDRESS": "localhost",

@@ -8,7 +8,7 @@ import urllib.parse
 from flask import Flask
 from datetime import datetime
 from typing import Iterable
-from server.common import BoxDataForInferenceInput, StationDataForInferenceInput, boxCounters, StationCounters, SingleStationInferenceResult, boxStatsSample, stationStatsSample, InferencesInput
+from server.common import boxCounters, StationCounters, SingleStationInferenceResult, boxStatsSample, stationStatsSample, InferencesInput
 
 POST_TIMEOUT_IN_SECS = 2
 
