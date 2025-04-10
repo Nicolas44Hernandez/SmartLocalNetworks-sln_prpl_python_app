@@ -8,7 +8,7 @@ from datetime import datetime
 from flask import Flask
 from server.interfaces.amx_usp_interface import AmxUspInterface
 from server.notification import notification_service
-from server.common import ServerBoxException, ErrorCode
+from server.common import ServerBoxException
 from server.common.model import stationStatsSample, boxStatsSample, samples_queue
 
 if os.getenv("FLASK_ENV") == "DEVELOPMENT":
