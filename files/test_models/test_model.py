@@ -106,8 +106,6 @@ tx_pps_box = sample_single[6]
 # STATION
 signalStrength = sample_single[7]
 downlinkMCS = sample_single[8]
-uplinkMCS = sample_single[9]
-uplinkShortGuard = sample_single[10]
 tx_Mbps = sample_single[11]
 rx_Mbps = sample_single[12]
 rx_pps = sample_single[13]
@@ -126,8 +124,6 @@ data = [
     tx_pps_box,
     signalStrength,
     downlinkMCS,
-    uplinkMCS,
-    uplinkShortGuard,
     tx_Mbps,
     rx_Mbps,
     rx_pps,

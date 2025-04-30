@@ -137,7 +137,6 @@ chmod 777 /etc/rc.d/S89_rlyeh_preinit
 ```
 
 ## Run the application
-TODO
 Connect to the Prpl device.
 Attach to container
 ```bash
@@ -151,6 +150,32 @@ cd /usr
 export FLASK_APP="server/app:create_app()"
 export FLASK_ENV="PRODUCTION"
 flask run --host '0.0.0.0' --port 6060
+```
+
+## Run the application as a service
+
+Set permisions
+```bash
+chmod +x /etc/init.d/sln
+```
+
+Run the service
+```bash
+/etc/init.d/sln start
+```
+Stop the service
+```bash
+/etc/init.d/sln start
+```
+
+Restart the service
+```bash
+/etc/init.d/sln restart
+```
+
+Check the service status
+```bash
+/etc/init.d/sln status
 ```
 
 ## Test the rest apis

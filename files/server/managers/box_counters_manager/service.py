@@ -71,7 +71,10 @@ class CountersManager(threading.Thread):
                 end = datetime.now()
                 delta = end - start
                 samples_queue.put({"box_counters" : box_counters, "stations_counters": connected_stations_counters })
-            waitting_time = self.polling_period_in_secs - delta.total_seconds() if self.running else self.polling_period_in_secs
+            # Compute watting time
+            waitting_time = self.polling_period_in_secs
+            if self.running and delta.total_seconds() < self.polling_period_in_secs:
+                waitting_time = self.polling_period_in_secs - delta.total_seconds()
             time.sleep(waitting_time)
 
     def get_box_radio_stats(self) -> dict:

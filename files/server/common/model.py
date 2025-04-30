@@ -199,8 +199,6 @@ class StationDataForInferenceInput:
     """Model for station data inference input"""
     station: str
     downlinkMCS: float
-    uplinkMCS: float
-    uplinkShortGuard: float
     tx_Mbps: float
     rx_Mbps: float
     rx_pps: float
@@ -212,8 +210,6 @@ class StationDataForInferenceInput:
         return {
             "station" : self.station,
             "downlinkMCS" : self.downlinkMCS,
-            "uplinkMCS" : self.uplinkMCS,
-            "uplinkShortGuard" : self.uplinkShortGuard,
             "tx_Mbps" : self.tx_Mbps,
             "rx_Mbps" : self.rx_Mbps,
             "rx_pps" : self.rx_pps,

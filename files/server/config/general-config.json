@@ -8,16 +8,16 @@
     "MODEL": "models/MLP_XP4_16_16_16/MLP_XP4_16_16_16_OPTIM.pkl",
     "PREDICTIONS_THRESHOLD": 0.5,
     "WEB_SERVER": {
-        "IP_ADDRESS": "192.168.102.12",
-        "PORT": 3000,
+        "IP_ADDRESS": "192.168.102.100",
+        "PORT": 80,
         "PATHS": {
-            "GENERAL_NOTIFICATION": "/api-sln/sample/",
-            "BAND_STATUS": "/api-sln/band_status/",
-            "BOX_TRAFFIC": "/api-sln/traffic/box",
-            "STATIONS_TRAFFIC": "/api-sln/traffic/stations",
-            "BOX_COUNTERS": "/api-sln/counters/box",
-            "STATIONS_COUNTERS": "/api-sln/counters/stations",
-            "INFERENCES_RESULTS": "/api-sln/inference/"
+            "GENERAL_NOTIFICATION": "/api/sample/",
+            "BAND_STATUS": "/api/band_status/",
+            "BOX_TRAFFIC": "/api/traffic/box",
+            "STATIONS_TRAFFIC": "/api/traffic/stations",
+            "BOX_COUNTERS": "/api/counters/box",
+            "STATIONS_COUNTERS": "/api/counters/stations",
+            "INFERENCES_RESULTS": "/api/inference/"
         }
     }
 }
