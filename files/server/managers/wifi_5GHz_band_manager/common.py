@@ -4,7 +4,7 @@ from datetime import datetime
 from server.common import boxCounters, boxStatsSample, stationStatsSample, StationCounters
 
 BANDS = ["2.4GHz", "5GHz", "6GHz"]
-MAX_THROUGHPUT_COUNTER_VALUE = 40
+MAX_THROUGHPUT_COUNTER_VALUE = 120
 COUNTERS_ARRAY_SIZE_TO_PERFORM_INFERENCE = 6
 
 def create_box_counter(sample: boxStatsSample):

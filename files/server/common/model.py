@@ -198,7 +198,6 @@ class BoxDataForInferenceInput:
 class StationDataForInferenceInput:
     """Model for station data inference input"""
     station: str
-    signalStrength: int
     downlinkMCS: float
     uplinkMCS: float
     uplinkShortGuard: float
@@ -212,7 +211,6 @@ class StationDataForInferenceInput:
         """Convert the dataclass instance to a dictionary."""
         return {
             "station" : self.station,
-            "signalStrength" : self.signalStrength,
             "downlinkMCS" : self.downlinkMCS,
             "uplinkMCS" : self.uplinkMCS,
             "uplinkShortGuard" : self.uplinkShortGuard,

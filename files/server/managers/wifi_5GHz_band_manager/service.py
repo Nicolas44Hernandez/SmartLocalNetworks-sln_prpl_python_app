@@ -102,7 +102,9 @@ class WifiBandsManager(threading.Thread, Counters):
                 self.print_counters(print_box_counters=False, print_stations_counters=False, print_inferences_results=True)
 
                 # Evaluate band status change
-                current_band_status = True if self.update_band_status_if_necessary() == "Up" else False
+                # TODO: Reactivate
+                #current_band_status = True if self.update_band_status_if_necessary() == "Up" else False
+                current_band_status = True
 
                 # Notify web server
                 notification_service.notify_sample_to_web_server(
@@ -135,8 +137,8 @@ class WifiBandsManager(threading.Thread, Counters):
             obssTime = self.counters_2GHz.obssTime
             rxTime = self.counters_2GHz.rxTime
             txTime = self.counters_2GHz.txTime
-            rx_Mbps_array = self.counters_2GHz.rx_Mbps
             tx_Mbps_array = self.counters_2GHz.tx_Mbps
+            rx_Mbps_array = self.counters_2GHz.rx_Mbps
             rx_pps = self.counters_2GHz.rx_pps
             tx_pps = self.counters_2GHz.tx_pps
         else:
@@ -150,8 +152,8 @@ class WifiBandsManager(threading.Thread, Counters):
             rxTime = _interim_rxTime if _interim_rxTime <= 100 else 100
             _interim_txTime = self.counters_2GHz.txTime + (FACTOR * self.counters_5GHz.txTime)
             txTime = _interim_txTime if _interim_txTime <= 100 else 100
-            tx_Mbps_array_original = [a + b for a, b in zip(self.counters_2GHz.tx_Mbps, self.counters_5GHz.tx_Mbps)]
-            rx_Mbps_array_original = [a + b for a, b in zip(self.counters_2GHz.rx_Mbps, self.counters_5GHz.rx_Mbps)]
+            tx_Mbps_array = [a + b for a, b in zip(self.counters_2GHz.tx_Mbps, self.counters_5GHz.tx_Mbps)]
+            rx_Mbps_array = [a + b for a, b in zip(self.counters_2GHz.rx_Mbps, self.counters_5GHz.rx_Mbps)]
             rx_pps = self.counters_2GHz.rx_pps + self.counters_5GHz.rx_pps
             tx_pps = self.counters_2GHz.tx_pps + self.counters_5GHz.tx_pps
 
@@ -161,8 +163,8 @@ class WifiBandsManager(threading.Thread, Counters):
         txTime = txTime if txTime >= 3 else 3
         rx_pps = rx_pps if rx_pps >= 5 else 5
         tx_pps = tx_pps if tx_pps >= 5 else 5
-        tx_Mbps_array = [a if a >= 0.005 else 0.005 for a in tx_Mbps_array_original]
-        rx_Mbps_array = [a if a >= 0.005 else 0.005 for a in rx_Mbps_array_original]
+        tx_Mbps_array = [a if a >= 0.05 else 0.05 for a in tx_Mbps_array]
+        rx_Mbps_array = [a if a >= 0.05 else 0.05 for a in rx_Mbps_array]
 
 
         # Create BoxDataForInferenceInput object
@@ -192,15 +194,14 @@ class WifiBandsManager(threading.Thread, Counters):
             try:
                 # MODEL VALUES CONSTRAINTS [WIP]
                 station_downlinkMCS = self.counters_stations[station].downlinkMCS if self.counters_stations[station].downlinkMCS > 3 else 3
-                station_tx_Mbps = [a if a >= 0.005 else 0.005 for a in self.counters_stations[station].tx_Mbps]
-                station_rx_Mbps = [a if a >= 0.005 else 0.005 for a in self.counters_stations[station].rx_Mbps]
+                station_tx_Mbps = [a if a >= 0.05 else 0.05 for a in self.counters_stations[station].tx_Mbps]
+                station_rx_Mbps = [a if a >= 0.05 else 0.05 for a in self.counters_stations[station].rx_Mbps]
                 station_rx_pps = self.counters_stations[station].rx_pps if self.counters_stations[station].rx_pps >= 5 else 5
                 station_tx_pps = self.counters_stations[station].tx_pps if self.counters_stations[station].tx_pps >= 5 else 5
 
                 stations_data_for_inference.append(
                     StationDataForInferenceInput(
                         station=station,
-                        signalStrength = float(self.counters_stations[station].signalStrength[-1]),
                         downlinkMCS = float(station_downlinkMCS),
                         uplinkMCS = float(self.counters_stations[station].uplinkMCS),
                         uplinkShortGuard = float(self.counters_stations[station].uplinkShortGuard),
@@ -275,8 +276,9 @@ class WifiBandsManager(threading.Thread, Counters):
     def set_band_status(self, new_status: bool):
         """Execute set wifi band status command in the livebox using AMX USP"""
         # Restart counters only if setting band ON
-        if new_status:
-            self.init_counters()
+        # TODO: reactivate or evaluate
+        # if new_status:
+        self.init_counters()
 
         # Retrieve path and params
         path = "Device.WiFi.Radio.2"

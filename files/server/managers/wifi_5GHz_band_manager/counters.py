@@ -81,7 +81,7 @@ class Counters():
             # If 5GHz band is OFF sample is None
             if sample is None:
                 self.counters_5GHz = None
-                logger.error(f"5GHz band is OFF counter is set to None")
+                logger.info(f"5GHz band is OFF counter is set to None")
                 return True
 
         elif band == "2.4GHz":
@@ -432,7 +432,7 @@ class Counters():
                         f"lastDataUplinkRate:{self.counters_stations[station].lastDataUplinkRate}  "
                         f"lastDataDownlinkRate:{self.counters_stations[station].lastDataDownlinkRate}  "
                         f"uplinkShortGuard:{self.counters_stations[station].uplinkShortGuard}  "
-                        f"inactive:{self.counters_stations[station].upliinactivenkShortGuard}  "
+                        f"inactive:{self.counters_stations[station].inactive}  "
                         f"downlinkMCS:{self.counters_stations[station].downlinkMCS}  "
                         f"avgSignalStrengthByChain:{self.counters_stations[station].avgSignalStrengthByChain}  "
                         f"signalNoiseRatio:{self.counters_stations[station].signalNoiseRatio}  "
