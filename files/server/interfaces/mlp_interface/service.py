@@ -56,8 +56,6 @@ class MlpModel:
                 f"box_data.rx_pps : {box_data.rx_pps}  "
                 f"box_data.tx_pps : {box_data.tx_pps}  "
                 f"station_data.downlinkMCS : {station_data.downlinkMCS}  "
-                f"station_data.uplinkMCS : {station_data.uplinkMCS}  "
-                f"station_data.uplinkShortGuard : {station_data.uplinkShortGuard}  "
                 f"station_data.tx_Mbps : {station_data.tx_Mbps}  "
                 f"station_data.rx_Mbps : {station_data.rx_Mbps}  "
                 f"station_data.rx_pps : {station_data.rx_pps}  "
@@ -75,8 +73,6 @@ class MlpModel:
                     box_data.rx_pps,
                     box_data.tx_pps,
                     station_data.downlinkMCS,
-                    station_data.uplinkMCS,
-                    station_data.uplinkShortGuard,
                     station_data.tx_Mbps,
                     station_data.rx_Mbps,
                     station_data.rx_pps,

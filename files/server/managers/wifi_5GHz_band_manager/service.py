@@ -102,9 +102,8 @@ class WifiBandsManager(threading.Thread, Counters):
                 self.print_counters(print_box_counters=False, print_stations_counters=False, print_inferences_results=True)
 
                 # Evaluate band status change
-                # TODO: Reactivate
-                #current_band_status = True if self.update_band_status_if_necessary() == "Up" else False
-                current_band_status = True
+                current_band_status = True if self.update_band_status_if_necessary() == "Up" else False
+                #current_band_status = True
 
                 # Notify web server
                 notification_service.notify_sample_to_web_server(
@@ -203,8 +202,6 @@ class WifiBandsManager(threading.Thread, Counters):
                     StationDataForInferenceInput(
                         station=station,
                         downlinkMCS = float(station_downlinkMCS),
-                        uplinkMCS = float(self.counters_stations[station].uplinkMCS),
-                        uplinkShortGuard = float(self.counters_stations[station].uplinkShortGuard),
                         tx_Mbps = float(station_tx_Mbps[-1]),
                         rx_Mbps = float(station_rx_Mbps[-1]),
                         rx_pps = float(station_rx_pps),
@@ -276,9 +273,8 @@ class WifiBandsManager(threading.Thread, Counters):
     def set_band_status(self, new_status: bool):
         """Execute set wifi band status command in the livebox using AMX USP"""
         # Restart counters only if setting band ON
-        # TODO: reactivate or evaluate
-        # if new_status:
-        self.init_counters()
+        if new_status:
+            self.init_counters()
 
         # Retrieve path and params
         path = "Device.WiFi.Radio.2"

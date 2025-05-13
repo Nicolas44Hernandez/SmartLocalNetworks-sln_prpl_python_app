@@ -92,7 +92,7 @@ class Counters():
 
         reset_counter = False
         # Check if is first received sample
-        if counter_to_update.last_sample_timestamp is None:
+        if counter_to_update is None or counter_to_update.last_sample_timestamp is None:
             logger.debug(f"First sample received for band {band}")
             reset_counter = True
         else:

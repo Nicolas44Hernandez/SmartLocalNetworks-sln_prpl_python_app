@@ -3,6 +3,8 @@ SRC_URI += "file://server"
 SRC_URI += "file://tests"
 SRC_URI += "file://test_models"
 SRC_URI += "file://models"
+SRC_URI += "file://start.sh"
+
 
 S = "${WORKDIR}"
 
@@ -97,3 +99,13 @@ FILES:${PN} += "/usr/server/*"
 FILES:${PN} += "/usr/tests/*"
 FILES:${PN} += "/usr/test_models/*"
 FILES:${PN} += "/usr/models/*"
+
+do_install:append () {
+        # Service script
+        install -d ${D}/etc/init.d
+        install -D -m 0755 start.sh ${D}/etc/init.d/sln
+}
+
+inherit update-rc.d
+INITSCRIPT_NAME = "sln"
+INITSCRIPT_PARAMS = "start 99 2 3 4 5 . stop 10 0 1 6 ."
