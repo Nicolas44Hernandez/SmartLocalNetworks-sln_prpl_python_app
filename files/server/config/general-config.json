@@ -3,7 +3,8 @@
     "API_VERSION": "v1",
     "COUNTERS": {
         "POLLING_PERIOD_IN_SECS": 5,
-        "PURGE_TIMER_IN_SECS": 20
+        "PURGE_TIMER_IN_SECS": 20,
+        "BAND_UPTIME_IN_MINS": 5
     },
     "MODEL": "models/MLP_XP4_16_16_16/MLP_XP4_16_16_16_OPTIM.pkl",
     "PREDICTIONS_THRESHOLD": 0.5,
