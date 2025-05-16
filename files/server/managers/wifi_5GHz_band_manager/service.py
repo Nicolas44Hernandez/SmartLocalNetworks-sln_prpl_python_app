@@ -4,6 +4,7 @@ import os
 import logging
 import threading
 import queue
+from datetime import datetime, timedelta
 from typing import Iterable, Tuple
 from flask import Flask
 from server.interfaces.amx_usp_interface import AmxUspInterface
@@ -20,6 +21,9 @@ class WifiBandsManager(threading.Thread, Counters):
     """Manager for wifi control"""
 
     amx_usp_interface: AmxUspInterface
+    dont_update_band_status_until: datetime
+    band_uptime_in_minutes: int
+
 
     def __init__(self, app: Flask = None) -> None:
         if app is not None:
@@ -31,9 +35,11 @@ class WifiBandsManager(threading.Thread, Counters):
             logger.info("initializing the WifiBandsManager")
             # Initialize configuration
             self.amx_usp_interface = AmxUspInterface()
+            self.dont_update_band_status_until = datetime.now()
 
             # Initialize counters
             self.purge_counters_timer_in_secs = app.config["COUNTERS"]["PURGE_TIMER_IN_SECS"]
+            self.band_uptime_in_minutes = app.config["COUNTERS"]["BAND_UPTIME_IN_MINS"]
             self.init_counters()
 
             # Run CountWifi bands inferences in dedicated thread
@@ -230,6 +236,10 @@ class WifiBandsManager(threading.Thread, Counters):
         else:
             current_band_status = "Down"
 
+        if datetime.now() < self.dont_update_band_status_until:
+            logger.info(f"Band status wont be updated until {self.dont_update_band_status_until}")
+            return current_band_status
+
         # Filter valid inferences
         inferences = mlp_inference_manager_service.get_valid_inferences(
             counters_stations=self.counters_stations
@@ -275,6 +285,7 @@ class WifiBandsManager(threading.Thread, Counters):
         # Restart counters only if setting band ON
         if new_status:
             self.init_counters()
+            self.dont_update_band_status_until = datetime.now() + timedelta(minutes=self.band_uptime_in_minutes)
 
         # Retrieve path and params
         path = "Device.WiFi.Radio.2"
