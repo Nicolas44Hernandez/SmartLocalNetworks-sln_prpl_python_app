@@ -236,10 +236,6 @@ class WifiBandsManager(threading.Thread, Counters):
         else:
             current_band_status = "Down"
 
-        if datetime.now() < self.dont_update_band_status_until:
-            logger.info(f"Band status wont be updated until {self.dont_update_band_status_until}")
-            return current_band_status
-
         # Filter valid inferences
         inferences = mlp_inference_manager_service.get_valid_inferences(
             counters_stations=self.counters_stations
@@ -254,6 +250,7 @@ class WifiBandsManager(threading.Thread, Counters):
             for prediction in inferences:
                 if prediction.status:
                     logger.info(f"Station {prediction.station} inference requires the band ON, the 5GHz band remains ON")
+                    self.dont_update_band_status_until = datetime.now() + timedelta(minutes=self.band_uptime_in_minutes)
                     return current_band_status
             logger.info(f"Setting 5GHz band OFF")
             self.set_band_status(new_status=False)
@@ -267,6 +264,7 @@ class WifiBandsManager(threading.Thread, Counters):
                 if prediction.status:
                     logger.info(f"Station {prediction.station} inference requires the band ON")
                     logger.info(f"Setting 5GHz band ON")
+                    self.dont_update_band_status_until = datetime.now() + timedelta(minutes=self.band_uptime_in_minutes)
                     self.set_band_status(new_status=True)
                     return current_band_status
             logger.info(f"5GHz band will remain OFF")
@@ -282,10 +280,15 @@ class WifiBandsManager(threading.Thread, Counters):
 
     def set_band_status(self, new_status: bool):
         """Execute set wifi band status command in the livebox using AMX USP"""
+
+        # If band ON timmer active dont turn off band
+        if not new_status and (datetime.now() < self.dont_update_band_status_until):
+            logger.info(f"Band wont be up turned OFF at least until {self.dont_update_band_status_until}")
+            return
+
         # Restart counters only if setting band ON
         if new_status:
             self.init_counters()
-            self.dont_update_band_status_until = datetime.now() + timedelta(minutes=self.band_uptime_in_minutes)
 
         # Retrieve path and params
         path = "Device.WiFi.Radio.2"
