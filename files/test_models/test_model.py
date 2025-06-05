@@ -60,7 +60,7 @@ def perform_inferences_in_batch(model, x_test, y_pred_original, y_pred_proba_ori
     print("\nProbability predictions in batch done")
 
     accuracy_percentage = compute_accuracy(y_pred_original.values, y_pred)
-    print(f"Accuracy prediction (Class): {accuracy_percentage:.2f}%")  # Output: Accuracy: 80.00%
+    print(f"Accuracy prediction - bach ussing threshold (Class): {accuracy_percentage:.2f}%")  # Output: Accuracy: 80.00%
     accuracy_percentage = compute_accuracy(y_pred_proba_original.values, y_pred_proba)
     print(f"Accuracy prediction (proba): {accuracy_percentage:.2f}%")  # Output: Accuracy: 80.00%
 
